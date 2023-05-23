@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ltest/map.dart';
 import 'package:ltest/postList.dart';
 import 'package:ltest/Loginpage.dart';
 import 'UserPage.dart';
@@ -26,7 +27,7 @@ class _unloginMainPageState extends State<unloginMainPage> {
     const requestpostList(), // 의뢰 탭
     const performList(), // 배송 탭
     const mainPost(), // 홈 탭
-    Center(child: Text('배송현황')), // 배송현황 탭
+    mapScreenState(), // 배송현황 탭
     UserPage(), // 마이페이지 탭
   ];
 
