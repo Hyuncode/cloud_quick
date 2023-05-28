@@ -1,8 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.ltest">
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION/" />
+    package="com.example.code">
    <application
-        android:label="ltest"
+        android:label="code"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
@@ -16,12 +15,10 @@
             <!-- Specifies an Android theme to apply to this Activity as soon as
                  the Android process has started. This theme is visible to the user
                  while the Flutter UI initializes. After that, this theme continues
-                 to determine the Window background behind the Flutter UI.
-                  android:name="io.flutter.embedding.android.NormalTheme" -->
+                 to determine the Window background behind the Flutter UI. -->
             <meta-data
-                android:name="com.naver.maps.map.CLIENT_ID"
-                android:value="qaji6jjpsa"
-                android:resource="@style/NormalTheme"
+              android:name="io.flutter.embedding.android.NormalTheme"
+              android:resource="@style/NormalTheme"
               />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -34,5 +31,4 @@
             android:name="flutterEmbedding"
             android:value="2" />
     </application>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 </manifest>

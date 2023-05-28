@@ -1,6 +1,6 @@
 import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:naver_map_plugin/naver_map_plugin.dart';
 
 class mapScreen extends StatelessWidget {
@@ -43,23 +43,6 @@ class _mapScreenState extends State<mapScreenState> {
   }
 }
 
-class location {
-  double latitude = 0;
-  double longitude = 0;
-
-  Future<void> getCurrentLocation() async {
-    LocationPermission permission = await Geolocator.checkPermission();
-    // print(permission);
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-    }
-    try {
-      Position position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high);
-      latitude = position.latitude;
-      longitude = position.longitude;
-    } catch (e) {
-      print(e);
-    }
-  }
-}
+/*Future<List> getLocation() async {
+  Position position = await d;
+} */

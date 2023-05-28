@@ -1,15 +1,15 @@
+import 'package:code/unlogined_main.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:ltest/firebase_options.dart';
-import 'package:ltest/logined_main.dart';
-import 'package:ltest/unlogined_main.dart';
+import 'firebase_options.dart';
+import 'logined_main.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
-  ); //Firebase 초기화
+  ); //Firtbase 초기화
   runApp(const MyApp());
 }
 
@@ -36,13 +36,21 @@ class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-      stream: FirebaseAuth.instance.authStateChanges(), //로그인 상태
+      stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
-        if(!snapshot.hasData) { //로그인 미인증 경우 로그인 안된 화면으로 이동
-          return unloginPage();
+        if(!snapshot.hasData) {
+          return UnloginPage();
         }
        return loginPage();
       },
     );
   }
 }
+
+/*
+합배송 제안
+  합배송 물품 비슷한 지역&시간대네 묶어버려서 추천하기 (디비 내에서)
+의뢰글 추천순
+
+최종에는 데이터 핸들링하는 거도 보여주는 게 (데이터 1000개, 2000개 동시성 제어)
+*/

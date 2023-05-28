@@ -1,12 +1,13 @@
+import 'package:code/postList.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:ltest/map.dart';
-import 'package:ltest/postList.dart';
+import 'chat.dart';
 import 'UserPage.dart';
 import 'addPost.dart';
-//import 'Chat.dart';
+import 'map.dart';
 
 class loginPage extends StatelessWidget {
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -25,9 +26,9 @@ class _unloginMainPageState extends State<unloginMainPage> {
   int _selectedIndex = 2; // 홈 탭이 기본으로 선택되도록 초기값 설정
 
   final List<Widget> _widgetOptions = <Widget>[
-    const requestpostList(), // 의뢰 탭
-    const performList(), // 배송 탭
-    const requestpostList(), // 홈 탭
+    const RequestPostList(), // 의뢰 탭
+    const RequestPostList(), // 배송 탭
+    const RequestPostList(), // 홈 탭
     //const Center(child: Text('배송현황')), // 배송현황 탭
     const mapScreen(),
     UserPage(), // 마이페이지 탭
@@ -62,20 +63,23 @@ class _unloginMainPageState extends State<unloginMainPage> {
           ),
           IconButton(
             onPressed: () {
-              /*
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => ChatPage()),
-              );
-            */
-            },
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ChatPage(chatRoomId: 'your_chat_room_id_here', chatRoom: {},),
+              ),
+            );
+          },
+
             icon: const Icon(Icons.chat),
           ),
+
           IconButton(
-              onPressed: () {
+              onPressed: (){
                 FirebaseAuth.instance.signOut();
               },
-              icon: const Icon(Icons.logout_outlined))
+              icon: const Icon(Icons.logout_outlined)
+          )
         ],
       ),
       body: _widgetOptions.elementAt(_selectedIndex),
