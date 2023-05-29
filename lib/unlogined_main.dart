@@ -27,7 +27,7 @@ class _unloginMainPageState extends State<unloginMainPage> {
     const requestpostList(), // 의뢰 탭
     const performList(), // 배송 탭
     const mainPost(), // 홈 탭
-    mapScreenState(), // 배송현황 탭
+    const mapScreenState(), // 배송현황 탭
     UserPage(), // 마이페이지 탭
   ];
 
