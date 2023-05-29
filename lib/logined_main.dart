@@ -27,7 +27,7 @@ class _unloginMainPageState extends State<unloginMainPage> {
   final List<Widget> _widgetOptions = <Widget>[
     const RequestPostList(), // 의뢰 탭
     const PerformPostList(), // 배송 탭
-    const MainPost(), // 홈 탭
+    const MainPost(), // 홈탭
     const mapScreen(),
     UserPage(), // 마이페이지 탭
   ];
