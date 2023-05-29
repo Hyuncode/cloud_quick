@@ -24,9 +24,9 @@ class _unloginMainPageState extends State<unloginMainPage> {
   int _selectedIndex = 2; // 홈 탭이 기본으로 선택되도록 초기값 설정
 
   final List<Widget> _widgetOptions = <Widget>[
-    const requestpostList(), // 의뢰 탭
-    const performList(), // 배송 탭
-    const mainPost(), // 홈 탭
+    const RequestPostList(), // 의뢰 탭
+    const PerformPostList(), // 배송 탭
+    const MainPost(), // 홈 탭
     const mapScreenState(), // 배송현황 탭
     UserPage(), // 마이페이지 탭
   ];
@@ -59,23 +59,14 @@ class _unloginMainPageState extends State<unloginMainPage> {
             icon: Icon(Icons.report),
           ),
           IconButton(
-            onPressed: () {/*
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => ChatPage()),
-              );
-            */},
-            icon: Icon(Icons.chat),
-          ),
-
-          IconButton(
               onPressed: (){
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const loginScreen()),
                 );
               },
-              icon: Icon(Icons.login))
+              icon: Icon(Icons.login)
+          )
         ],
       ),
       body: _widgetOptions.elementAt(_selectedIndex),

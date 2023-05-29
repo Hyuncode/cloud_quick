@@ -4,7 +4,7 @@ import 'package:ltest/map.dart';
 import 'package:ltest/postList.dart';
 import 'UserPage.dart';
 import 'addPost.dart';
-//import 'Chat.dart';
+import 'chat.dart';
 
 class loginPage extends StatelessWidget {
   @override
@@ -25,10 +25,9 @@ class _unloginMainPageState extends State<unloginMainPage> {
   int _selectedIndex = 2; // 홈 탭이 기본으로 선택되도록 초기값 설정
 
   final List<Widget> _widgetOptions = <Widget>[
-    const requestpostList(), // 의뢰 탭
-    const performList(), // 배송 탭
-    const requestpostList(), // 홈 탭
-    //const Center(child: Text('배송현황')), // 배송현황 탭
+    const RequestPostList(), // 의뢰 탭
+    const PerformPostList(), // 배송 탭
+    const MainPost(), // 홈 탭
     const mapScreen(),
     UserPage(), // 마이페이지 탭
   ];
@@ -62,13 +61,13 @@ class _unloginMainPageState extends State<unloginMainPage> {
           ),
           IconButton(
             onPressed: () {
-              /*
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => ChatPage()),
+                MaterialPageRoute(
+                  builder: (context) => ChatPage(chatRoomId: 'your_chat_room_id_here', chatRoom: {},),
+                ),
               );
-            */
-            },
+              },
             icon: const Icon(Icons.chat),
           ),
           IconButton(
