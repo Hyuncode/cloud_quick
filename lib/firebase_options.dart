@@ -21,15 +21,9 @@ class DefaultFirebaseOptions {
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for android - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return android;
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for ios - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return ios;
       case TargetPlatform.macOS:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for macos - '
@@ -61,5 +55,25 @@ class DefaultFirebaseOptions {
     databaseURL: 'https://cloud-quick-default-rtdb.asia-southeast1.firebasedatabase.app',
     storageBucket: 'cloud-quick.appspot.com',
     measurementId: 'G-LH002J47W8',
+  );
+
+  static const FirebaseOptions android = FirebaseOptions(
+    apiKey: 'AIzaSyBEBHApCYyZu3bjS_fUqy6MimahiVFceZM',
+    appId: '1:573930422878:android:f26b7a5dd928a90306aacf',
+    messagingSenderId: '573930422878',
+    projectId: 'cloud-quick',
+    databaseURL: 'https://cloud-quick-default-rtdb.asia-southeast1.firebasedatabase.app',
+    storageBucket: 'cloud-quick.appspot.com',
+  );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyCaQ6eEhgbIKOqLagBejABo2W3uVFeVT_I',
+    appId: '1:573930422878:ios:c2c51f6a7bb0a53706aacf',
+    messagingSenderId: '573930422878',
+    projectId: 'cloud-quick',
+    databaseURL: 'https://cloud-quick-default-rtdb.asia-southeast1.firebasedatabase.app',
+    storageBucket: 'cloud-quick.appspot.com',
+    iosClientId: '573930422878-uogh1ecue0cc0d8t3ndoq1gml1mcgsfa.apps.googleusercontent.com',
+    iosBundleId: 'com.example.code',
   );
 }

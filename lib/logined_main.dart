@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:ltest/map.dart';
-import 'package:ltest/postList.dart';
+import 'map.dart';
+import 'postList.dart';
 import 'UserPage.dart';
 import 'addPost.dart';
 import 'chat.dart';

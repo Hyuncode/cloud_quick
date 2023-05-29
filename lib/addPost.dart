@@ -3,7 +3,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:io';
-import 'package:ltest/logined_main.dart';
 
 class PostForm extends StatefulWidget {
 
@@ -70,12 +69,22 @@ class _PostFormState extends State<PostForm> {
       });
     }
   }
- //
+  //
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('게시글 작성'),
+        /*
+        actions: [
+          IconButton(
+            onPressed: () {
+              submitData();
+              // 게시글 업로드 처리
+            },
+            icon: const Icon(Icons.check),
+          ),
+        ], */
       ),
       body: Form(
         key: _formKey,
@@ -336,7 +345,7 @@ class _PostFormState extends State<PostForm> {
               onPressed: () {
                 if(userState != null) {
                   submitData(); // 게시글 업로드 처리
-                }//if
+                }
                 else{
                   showDialog(
                       context: context,
@@ -346,7 +355,7 @@ class _PostFormState extends State<PostForm> {
                         );
                       }
                   );
-                } //else
+                }
               },
               child: const Text('게시글 업로드'),
             ),

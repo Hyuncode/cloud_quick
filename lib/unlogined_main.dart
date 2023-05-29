@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:ltest/map.dart';
-import 'package:ltest/postList.dart';
-import 'package:ltest/Loginpage.dart';
+import 'map.dart';
+import 'postList.dart';
+import 'Loginpage.dart';
 import 'UserPage.dart';
 import 'addPost.dart';
 

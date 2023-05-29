@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>573930422878-oe0l9dpgfchff0elolb4v6uu08m7eigl.apps.googleusercontent.com</string>
+	<string>573930422878-uogh1ecue0cc0d8t3ndoq1gml1mcgsfa.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.573930422878-oe0l9dpgfchff0elolb4v6uu08m7eigl</string>
+	<string>com.googleusercontent.apps.573930422878-uogh1ecue0cc0d8t3ndoq1gml1mcgsfa</string>
 	<key>API_KEY</key>
 	<string>AIzaSyCaQ6eEhgbIKOqLagBejABo2W3uVFeVT_I</string>
 	<key>GCM_SENDER_ID</key>
@@ -13,7 +13,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.example.ltest</string>
+	<string>com.example.code</string>
 	<key>PROJECT_ID</key>
 	<string>cloud-quick</string>
 	<key>STORAGE_BUCKET</key>
@@ -29,7 +29,7 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:573930422878:ios:511e1bf2af49117706aacf</string>
+	<string>1:573930422878:ios:c2c51f6a7bb0a53706aacf</string>
 	<key>DATABASE_URL</key>
 	<string>https://cloud-quick-default-rtdb.asia-southeast1.firebasedatabase.app</string>
 </dict>
