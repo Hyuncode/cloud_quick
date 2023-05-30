@@ -5,22 +5,20 @@ import 'package:http/http.dart';
 import 'package:naver_map_plugin/naver_map_plugin.dart';
 import 'dart:convert';
 
-
-
 class mapScreen extends StatelessWidget {
- const mapScreen({Key? key}) : super(key: key);
+  const mapScreen({Key? key}) : super(key: key);
 
- @override
- Widget build(BuildContext context) {
-  return const MaterialApp(
-    title: 'mapScreen',
-    home: mapScreenState(),
-  );
- }
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      title: 'mapScreen',
+      home: mapScreenState(),
+    );
+  }
 }
 
 class mapScreenState extends StatefulWidget {
-  const mapScreenState({Key? key}) : super (key: key);
+  const mapScreenState({Key? key}) : super(key: key);
 
   @override
   _mapScreenState createState() => _mapScreenState();
@@ -32,28 +30,26 @@ class _mapScreenState extends State<mapScreenState> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Column(
-          children: <Widget>[
-            Text("location"),
-            FutureBuilder(
-              future: getCurrentLocation(),
-              builder: (BuildContext context, AsyncSnapshot snapshot){
-                List ll = snapshot.data;
-                if(snapshot.hasData == false){
-                  return CircularProgressIndicator();
-                }
-                else {
-                  return Container(
-                    child: Text(ll[0].toString()),
-                  );
-                }
-              },
-            )
-          ],
-        ),
-      )
-    );
+        body: Center(
+      child: Column(
+        children: <Widget>[
+          Text("location"),
+          FutureBuilder(
+            future: getCurrentLocation(),
+            builder: (BuildContext context, AsyncSnapshot snapshot) {
+              List ll = snapshot.data;
+              if (snapshot.hasData == false) {
+                return CircularProgressIndicator();
+              } else {
+                return Container(
+                  child: Text(ll[0].toString()),
+                );
+              }
+            },
+          )
+        ],
+      ),
+    ));
   }
 
   void onMapCreated(NaverMapController controller) {
@@ -82,21 +78,24 @@ Future<List> getCurrentLocation() async {
   return convertLocation(location);
 }
 
-Future<List> convertLocation(List location) async{
+Future<List> convertLocation(List location) async {
   String lat = location[0].toString();
   String lon = location[1].toString();
 
   final String clientID = "qaji6jjpsa"; // naver client id
-  final String clientSecret = "FKgN6yhINBcuXrUDC62ChOAbTevYiVEviRQWTO9g"; // naver secret key
+  final String clientSecret =
+      "FKgN6yhINBcuXrUDC62ChOAbTevYiVEviRQWTO9g"; // naver secret key
   String url = "https://naveropenapi.apigw.ntruss.com/map-reversegeocode/v2/gc?"
       "coords=126.8343943, 37.5604629&"
       "sourcecrs=epsg:4326&"
       "output=json&"
       "orders=roadaddr";
 
-  Map<String,String> naverID = {
-    "X-NCP-APIGW-API-KEY-ID":"qaji6jjpsa", // 개인 클라이언트 아이디
-    "X-NCP-APIGW-API-KEY":"FKgN6yhINBcuXrUDC62ChOAbTevYiVEviRQWTO9g" // 개인 시크릿 키
+  Map<String, String> naverID = {
+    "X-NCP-APIGW-API-KEY-ID": "qaji6jjpsa",
+    // 개인 클라이언트 아이디
+    "X-NCP-APIGW-API-KEY": "FKgN6yhINBcuXrUDC62ChOAbTevYiVEviRQWTO9g"
+    // 개인 시크릿 키
   };
 
   print(lon);
@@ -119,9 +118,11 @@ Future<List> convertLocation(List location) async{
   String locationData = response.body;
   print(locationData);
 
-  var locationGu = jsonDecode(locationData)["result"][1]['region']['area2']['name'];
-  var locationSi = jsonDecode(locationData)["result"][1]['region']['area1']['name'];
-  
+  var locationGu =
+      jsonDecode(locationData)["result"][1]['region']['area2']['name'];
+  var locationSi =
+      jsonDecode(locationData)["result"][1]['region']['area1']['name'];
+
   List<String> convertedData = [locationSi, locationGu];
   return convertedData;
 }

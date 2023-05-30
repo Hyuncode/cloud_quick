@@ -59,14 +59,13 @@ class _unloginMainPageState extends State<unloginMainPage> {
             icon: Icon(Icons.report),
           ),
           IconButton(
-              onPressed: (){
+              onPressed: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const loginScreen()),
                 );
               },
-              icon: Icon(Icons.login)
-          )
+              icon: Icon(Icons.login))
         ],
       ),
       body: _widgetOptions.elementAt(_selectedIndex),
