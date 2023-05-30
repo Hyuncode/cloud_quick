@@ -66,7 +66,7 @@ class _unloginMainPageState extends State<unloginMainPage> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => ChatPage(chatRoomId: 'your_chat_room_id_here', chatRoom: {},),
+                builder: (context) => ChatRoomListPage(),
               ),
             );
           },

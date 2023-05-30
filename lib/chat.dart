@@ -1,16 +1,93 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+class ChatRoomListPage extends StatefulWidget {
+  @override
+  _ChatRoomListPageState createState() => _ChatRoomListPageState();
+}
+
+class _ChatRoomListPageState extends State<ChatRoomListPage> {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  late CollectionReference _chatRoomsCollection;
+  late Stream<QuerySnapshot> _chatRoomsStream;
+  late String _currentUser;
+
+  @override
+  void initState() {
+    super.initState();
+    _chatRoomsCollection = _firestore.collection('chatRooms');
+    _currentUser = FirebaseAuth.instance.currentUser!.uid;
+    _chatRoomsStream = _chatRoomsCollection
+        .where('users', arrayContains: _currentUser)
+        .snapshots();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('채팅방 목록'),
+      ),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: _chatRoomsStream,
+        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (snapshot.hasError) {
+            return Text('Error: ${snapshot.error}');
+          }
+
+          switch (snapshot.connectionState) {
+            case ConnectionState.waiting:
+              return Center(child: CircularProgressIndicator());
+            default:
+              if (snapshot.data!.size == 0) {
+                return Center(child: Text('채팅방이 없습니다.'));
+              }
+              return ListView.builder(
+                itemCount: snapshot.data!.size,
+                itemBuilder: (BuildContext context, int index) {
+                  final chatRoom = snapshot.data!.docs[index];
+                  return ListTile(
+                    title: Text('채팅방 ${index + 1}'),
+                    subtitle: Text(_getChatPartner(chatRoom)),
+                    onTap: () {
+                      _navigateToChatPage(chatRoom.id, Map<String, dynamic>.from(chatRoom.data()! as Map));
+                    },
+                  );
+                },
+              );
+          }
+        },
+      ),
+    );
+  }
+
+  String _getChatPartner(DocumentSnapshot chatRoom) {
+    final List<String> users = chatRoom['users'].cast<String>();
+    users.remove(_currentUser);
+    return users[0];
+  }
+
+  void _navigateToChatPage(String chatRoomId, Map<String, dynamic> chatRoom) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ChatPage(chatRoomId: chatRoomId),
+      ),
+    );
+  }
+}
 
 class ChatPage extends StatefulWidget {
   final String chatRoomId;
-  final Map<String, dynamic> chatRoom;
+  final Map<String, dynamic>? chatRoom; // chatRoom 매개변수는 선택적으로 설정
 
-  const ChatPage({required this.chatRoomId, required this.chatRoom});
+  const ChatPage({required this.chatRoomId, this.chatRoom}); // chatRoom 매개변수는 선택적으로 설정
 
   @override
   _ChatPageState createState() => _ChatPageState();
 }
+
 
 class _ChatPageState extends State<ChatPage> {
   final TextEditingController _textController = TextEditingController();
@@ -94,11 +171,10 @@ class _ChatPageState extends State<ChatPage> {
         ],
       ),
     );
-
   }
 
   String _getChatPartner(QueryDocumentSnapshot message) {
-    final List<String> users = widget.chatRoom['users'].cast<String>();
+    final List<String> users = message['users'].cast<String>();
     if (users[0] == _currentUser) {
       return users[1];
     } else {
@@ -109,12 +185,34 @@ class _ChatPageState extends State<ChatPage> {
   void _sendMessage(String text) {
     if (text.trim().isEmpty) return;
     final timestamp = Timestamp.now();
-    final users = widget.chatRoom['users'];
     _messagesCollection.add({
       'text': text,
       'chatRoomId': widget.chatRoomId,
-      'users': users,
+      'users': [_currentUser, _getChatPartnerFromId(widget.chatRoomId)],
       'timestamp': timestamp,
     });
+  }
+
+  String _getChatPartnerFromId(String chatRoomId) {
+    final List<String> roomUsers = chatRoomId.split('_');
+    roomUsers.remove(_currentUser);
+    return roomUsers[0];
+  }
+}
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Chat App',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: ChatRoomListPage(),
+    );
   }
 }
