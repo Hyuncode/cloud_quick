@@ -63,13 +63,13 @@ class _unloginMainPageState extends State<unloginMainPage> {
           ),
           IconButton(
             onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ChatRoomListPage(),
-              ),
-            );
-          },
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ChatRoomListPage(),
+                ),
+              );
+            },
 
             icon: const Icon(Icons.chat),
           ),
