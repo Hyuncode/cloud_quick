@@ -22,7 +22,6 @@ void registerPlugins(Registrar registrar) {
   FirebaseCoreWeb.registerWith(registrar);
   FirebaseDatabaseWeb.registerWith(registrar);
   FirebaseMessagingWeb.registerWith(registrar);
-  FirebaseStorageWeb.registerWith(registrar);
   //FirebaseStorageWeb.registerWith(registrar);
   ImagePickerPlugin.registerWith(registrar);
   registrar.registerMessageHandler();
