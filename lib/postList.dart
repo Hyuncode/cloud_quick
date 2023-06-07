@@ -176,8 +176,6 @@ class _MainPostState extends State<MainPost> {
 
   FirebaseFirestore.instance.collection('list');
 
-      FirebaseFirestore.instance.collection('list');
-
   late String startPosition = "";
   late String endPosition = "";
 

@@ -5,6 +5,7 @@ import 'postList.dart';
 import 'UserPage.dart';
 import 'addPost.dart';
 import 'chat.dart';
+import 'chatPage.dart';
 
 class loginPage extends StatelessWidget {
   @override
@@ -64,14 +65,7 @@ class _unloginMainPageState extends State<unloginMainPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-
                   builder: (context) => ChatRoomListPage(),
-
-                  builder: (context) => ChatPage(
-                    chatRoomId: 'your_chat_room_id_here',
-                    chatRoom: {},
-                  ),
-
                 ),
               );
             },
