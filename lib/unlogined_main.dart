@@ -1,32 +1,33 @@
 import 'package:flutter/material.dart';
+import 'map.dart';
 import 'postList.dart';
-import 'loginPage.dart';
-import 'userPage.dart';
+import 'Loginpage.dart';
+import 'UserPage.dart';
 import 'addPost.dart';
 
-class UnloginPage extends StatelessWidget {
+class unloginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: '구름 배송',
-      home: UnloginMainPage(),
+      home: unloginMainPage(),
     );
   }
 }
 
-class UnloginMainPage extends StatefulWidget {
+class unloginMainPage extends StatefulWidget {
   @override
-  _UnloginMainPageState createState() => _UnloginMainPageState();
+  _unloginMainPageState createState() => _unloginMainPageState();
 }
 
-class _UnloginMainPageState extends State<UnloginMainPage> {
+class _unloginMainPageState extends State<unloginMainPage> {
   int _selectedIndex = 2; // 홈 탭이 기본으로 선택되도록 초기값 설정
 
   final List<Widget> _widgetOptions = <Widget>[
     const RequestPostList(), // 의뢰 탭
-    const RequestPostList(), // 배송 탭
-    PostListPage(), // 홈 탭
-    Center(child: Text('배송현황')), // 배송현황 탭
+    const PerformPostList(), // 배송 탭
+    const MainPost(), // 홈탭
+    const mapScreenState(), // 배송현황 탭
     UserPage(), // 마이페이지 탭
   ];
 
@@ -58,14 +59,13 @@ class _UnloginMainPageState extends State<UnloginMainPage> {
             icon: Icon(Icons.report),
           ),
           IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const loginScreen()),
-              );
-            },
-            icon: Icon(Icons.login),
-          ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const loginScreen()),
+                );
+              },
+              icon: Icon(Icons.login))
         ],
       ),
       body: _widgetOptions.elementAt(_selectedIndex),
@@ -107,3 +107,11 @@ class PostListPage extends StatelessWidget {
     return Center(child: Text('게시글 목록'));
   }
 }
+
+/*
+합배송 제안
+  합배송 물품 비슷한 지역&시간대네 묶어버려서 추천하기 (디비 내에서)
+의뢰글 추천순
+
+최종에는 데이터 핸들링하는 거도 보여주는 게 (데이터 1000개, 2000개 동시성 제어)
+*/

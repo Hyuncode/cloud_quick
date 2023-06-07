@@ -1,4 +1,4 @@
-import 'package:code/unlogined_main.dart';
+import 'unlogined_main.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -27,21 +27,21 @@ class MyApp extends StatelessWidget {
 
 class MainPage extends StatefulWidget {
   const MainPage({Key? key}) : super(key: key);
+
   @override
   _MainPageState createState() => _MainPageState();
 }
 
 class _MainPageState extends State<MainPage> {
-
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
-        if(!snapshot.hasData) {
-          return UnloginPage();
+        if (!snapshot.hasData) {
+          return unloginPage();
         }
-       return loginPage();
+        return loginPage();
       },
     );
   }

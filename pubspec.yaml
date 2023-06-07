@@ -45,8 +45,12 @@ dependencies:
   naver_map_plugin: ^0.9.6
   flutterfire_ui: ^0.4.3+20
   geolocator: ^9.0.2
+  http: ^0.13.6
+  latlong2: ^0.8.2
+
   #dependency_overrides:
  # intl: ^0.18.0
+
 
 dev_dependencies:
   flutter_test:

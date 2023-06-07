@@ -1,8 +1,17 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
+import 'package:geolocator/geolocator.dart';
 import 'chat.dart';
+import "package:latlong2/latlong.dart";
+
+Future<List> getLocation() async{
+  Position position = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high);
+
+  List<String> location = [position.latitude.toString(), position.longitude.toString()];
+  return location;
+}
 
 void main() {
   runApp(MyApp());
@@ -38,8 +47,10 @@ class RequestList extends StatefulWidget {
 }
 
 class _RequestListState extends State<RequestList> {
+  final Stream<QuerySnapshot> collectionStream =
+      FirebaseFirestore.instance.collection('list').snapshots();
   final CollectionReference postList =
-  FirebaseFirestore.instance.collection('list');
+      FirebaseFirestore.instance.collection('list');
   final Query db_r = FirebaseFirestore.instance
       .collection('list')
       .where("postOption", isEqualTo: "의뢰");
@@ -108,8 +119,12 @@ class PerformList extends StatefulWidget {
 }
 
 class _PerformListState extends State<PerformList> {
+
+  final Stream<QuerySnapshot> collectionStream =
+      FirebaseFirestore.instance.collection('list').snapshots();
+
   final CollectionReference postList =
-  FirebaseFirestore.instance.collection('list');
+      FirebaseFirestore.instance.collection('list');
 
   final Query db_p = FirebaseFirestore.instance
       .collection('list')
@@ -158,13 +173,22 @@ class MainPost extends StatefulWidget {
 
 class _MainPostState extends State<MainPost> {
   final CollectionReference main_db =
+
   FirebaseFirestore.instance.collection('list');
+
+      FirebaseFirestore.instance.collection('list');
+
   late String startPosition = "";
   late String endPosition = "";
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+
+      /*appBar: AppBar(
+        title: const Text('메인 게시물'),
+      ),*/
+
       body: Column(
         children: [
           TextField(
@@ -203,39 +227,36 @@ class _MainPostState extends State<MainPost> {
           ),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream: main_db
-                  .where("postStart", isEqualTo: startPosition)
-                  .snapshots(),
-              builder: (BuildContext context,
-                  AsyncSnapshot<QuerySnapshot> snapshot) {
-                if (snapshot.hasError) {
-                  return Text('오류 발생: ${snapshot.error}');
-                }
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Text('로딩 중...');
-                }
-                return ListView(
-                  children: snapshot.data!.docs
-                      .map((QueryDocumentSnapshot document) {
-                    return GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => PostPage(document),
+                  stream: main_db
+                      .where("postStart", isEqualTo: startPosition)
+                      .snapshots(),
+                  builder: (BuildContext context,
+                      AsyncSnapshot<QuerySnapshot> snapshot) {
+                    if (snapshot.hasError) {
+                      return Text('오류 발생: ${snapshot.error}');
+                    }
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Text('로딩 중...');
+                    }
+                    return ListView(
+                      children: snapshot.data!.docs
+                          .map((QueryDocumentSnapshot document) {
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => PostPage(document)),
+                            );
+                          },
+                          child: ListTile(
+                            title: Text(document['postTitle']),
+                            subtitle: Text(document['content']),
                           ),
                         );
-                      },
-                      child: ListTile(
-                        title: Text(document['postTitle']),
-                        subtitle: Text(document['content']),
-                      ),
+                      }).toList(),
                     );
-                  }).toList(),
-                );
-              },
-            ),
-          ),
+                  }))
         ],
       ),
     );
@@ -271,6 +292,7 @@ class _PostPageState extends State<PostPage> {
       ),
     );
   }
+
 
   void _createChatRoom(String userId) async {
     final currentUser = FirebaseAuth.instance.currentUser;
