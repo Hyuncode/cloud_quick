@@ -19,11 +19,9 @@ class _ChatRoomListPageState extends State<ChatRoomListPage> {
     _chatRoomsCollection = _firestore.collection('chatRooms');
     _currentUser = FirebaseAuth.instance.currentUser!.uid;
     _chatRoomsStream = _chatRoomsCollection
-        .orderBy('timestamp', descending: true)
+        .where('users', arrayContains: _currentUser)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-        .where((doc) => doc['users'].contains(_currentUser))
-        .toList());
+        .map((snapshot) => snapshot.docs.toList());
   }
 
   @override
@@ -37,7 +35,7 @@ class _ChatRoomListPageState extends State<ChatRoomListPage> {
         builder: (BuildContext context,
             AsyncSnapshot<List<QueryDocumentSnapshot>> snapshot) {
           if (snapshot.hasError) {
-            return Text('Error: ${snapshot.error}');
+            return Text('오류 발생: ${snapshot.error}');
           }
 
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -56,10 +54,14 @@ class _ChatRoomListPageState extends State<ChatRoomListPage> {
               final chatRoom = chatRooms[index];
               final chatRoomId = chatRoom.id;
               final chatRoomData = chatRoom.data() as Map<String, dynamic>;
+              final users = chatRoomData['users'] as List<dynamic>;
+              final otherUser =
+              users.firstWhere((user) => user != _currentUser);
               return ListTile(
-                title: Text('채팅방 ${index + 1}'),
+                title: Text('상대방: $otherUser'),
+                subtitle: Text(chatRoomData['lastMessage']),
                 onTap: () {
-                  _navigateToChatPage(chatRoomId, chatRoomData);
+                  _navigateToChatPage(chatRoomData, chatRoomId);
                 },
               );
             },
@@ -69,38 +71,55 @@ class _ChatRoomListPageState extends State<ChatRoomListPage> {
     );
   }
 
-  void _navigateToChatPage(String chatRoomId, Map<String, dynamic> chatRoomData) {
-    // 기존에 존재하는 채팅방인지 확인
-    if (chatRoomData != null) {
+  void _navigateToChatPage(
+      Map<String, dynamic>? chatRoomData, String chatRoomId) async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('로그인이 필요합니다.')),
+      );
+      return;
+    }
+
+    final chatRoomsRef = FirebaseFirestore.instance.collection('chatRooms');
+
+    final existingChatRoomQuery = chatRoomsRef
+        .where('users', arrayContains: currentUser.uid)
+        .where('users', arrayContains: chatRoomData?['userId']);
+    final existingChatRoomSnapshot = await existingChatRoomQuery.get();
+
+    if (existingChatRoomSnapshot.docs.isNotEmpty) {
+      final existingChatRoom = existingChatRoomSnapshot.docs.first;
       Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => ChatPage(
-            chatRoomId: chatRoomId,
-            chatRoom: chatRoomData,
+            chatRoomId: existingChatRoom.id,
+            chatRoom: existingChatRoom.data() as Map<String, dynamic>,
           ),
         ),
       );
     } else {
-      // 기존에 존재하지 않는 채팅방일 경우 새로운 채팅방 생성
-      final newChatRoomData = {
-        'users': [_currentUser, '상대방 사용자 ID'], // 상대방 사용자 ID를 채팅방 생성 시 함께 추가
-        'timestamp': Timestamp.now(),
+      final chatRoom = {
+        'users': [currentUser.uid, chatRoomData?['userId']],
+        'lastMessage': '',
+        'lastMessageTime': Timestamp.now(),
       };
 
-      _chatRoomsCollection.add(newChatRoomData).then((newChatRoomRef) {
-        final newChatRoomId = newChatRoomRef.id;
+      chatRoomsRef.add(chatRoom).then((value) {
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => ChatPage(
-              chatRoomId: newChatRoomId,
-              chatRoom: newChatRoomData,
+              chatRoomId: value.id,
+              chatRoom: chatRoom,
             ),
           ),
         );
       }).catchError((error) {
-        print('Error creating new chat room: $error');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('채팅방 생성에 실패했습니다: $error')),
+        );
       });
     }
   }
@@ -154,7 +173,7 @@ class _ChatPageState extends State<ChatPage> {
               builder: (BuildContext context,
                   AsyncSnapshot<List<QueryDocumentSnapshot>> snapshot) {
                 if (snapshot.hasError) {
-                  return Text('Error: ${snapshot.error}');
+                  return Text('오류 발생: ${snapshot.error}');
                 }
 
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -164,7 +183,7 @@ class _ChatPageState extends State<ChatPage> {
                 final messages = snapshot.data;
 
                 if (messages == null || messages.isEmpty) {
-                  return Center(child: Text('메세지가 없습니다.'));
+                  return Center(child: Text('메시지가 없습니다.'));
                 }
 
                 return ListView.builder(
@@ -181,8 +200,9 @@ class _ChatPageState extends State<ChatPage> {
                       title: Text(
                         messageText,
                         style: TextStyle(
-                          fontWeight:
-                          isCurrentUser ? FontWeight.bold : FontWeight.normal,
+                          fontWeight: isCurrentUser
+                              ? FontWeight.bold
+                              : FontWeight.normal,
                         ),
                       ),
                       subtitle: Text(senderId),
@@ -200,7 +220,7 @@ class _ChatPageState extends State<ChatPage> {
                   child: TextField(
                     controller: _messageController,
                     decoration: InputDecoration(
-                      hintText: '메세지 입력',
+                      hintText: '메시지 입력',
                     ),
                   ),
                 ),
