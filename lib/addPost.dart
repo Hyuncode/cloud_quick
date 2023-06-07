@@ -1,11 +1,20 @@
+import 'package:code/map.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:geolocator/geolocator.dart';
 import 'dart:io';
 
-class PostForm extends StatefulWidget {
+Future<List> getLocation() async{
+  Position position = await Geolocator.getCurrentPosition(
+    desiredAccuracy: LocationAccuracy.high);
 
+  List<String> location = [position.latitude.toString(), position.longitude.toString()];
+  return location;
+}
+
+class PostForm extends StatefulWidget {
   @override
   _PostFormState createState() => _PostFormState();
 }
@@ -26,19 +35,24 @@ class _PostFormState extends State<PostForm> {
   final userState = FirebaseAuth.instance.currentUser;
   final List<File> _imageFiles = [];
 
-  void submitData() async { //firestore data upload
+  void submitData() async {
+    //firestore data upload
     CollectionReference firePost =
-    FirebaseFirestore.instance.collection("list");
+        FirebaseFirestore.instance.collection("list");
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
 
     try {
       await firePost.add({
-        'postTitle' : _titleController.text,
-        'postStart' : _startController.text,
-        'postEnd' : _endController.text,
-        'content' : _contentController.text,
-        'postOption' : selectedOption,
-        'category' : selectedCategory,
-        'userId' : userState?.uid
+        'postTitle': _titleController.text,
+        'postStart': _startController.text,
+        'postEnd': _endController.text,
+        'content': _contentController.text,
+        'postOption': selectedOption,
+        'category': selectedCategory,
+        'userId': userState?.uid,
+        'position_lat': position.latitude,
+        'position_lon': position.longitude
       });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('added')),
@@ -62,29 +76,21 @@ class _PostFormState extends State<PostForm> {
   }
 
   Future<void> _selectImage() async {
-    final pickedFile = await _imagePicker.pickImage(source: ImageSource.gallery);
+    final pickedFile =
+        await _imagePicker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
         _imageFiles.add(File(pickedFile.path));
       });
     }
   }
+
   //
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('게시글 작성'),
-        /*
-        actions: [
-          IconButton(
-            onPressed: () {
-              submitData();
-              // 게시글 업로드 처리
-            },
-            icon: const Icon(Icons.check),
-          ),
-        ], */
       ),
       body: Form(
         key: _formKey,
@@ -184,7 +190,8 @@ class _PostFormState extends State<PostForm> {
                               context: context,
                               initialDate: DateTime.now(),
                               firstDate: DateTime.now(),
-                              lastDate: DateTime.now().add(const Duration(days: 365)),
+                              lastDate:
+                                  DateTime.now().add(const Duration(days: 365)),
                             );
                             setState(() {
                               _selectedDate = selectedDate!;
@@ -237,7 +244,6 @@ class _PostFormState extends State<PostForm> {
               ],
             ),
 
-
             const SizedBox(height: 16), // 간격 조절
             Container(
               height: 1,
@@ -289,7 +295,9 @@ class _PostFormState extends State<PostForm> {
                       child: Text(
                         '의뢰',
                         style: TextStyle(
-                          color: selectedOption == '의뢰' ? Colors.white : Colors.black,
+                          color: selectedOption == '의뢰'
+                              ? Colors.white
+                              : Colors.black,
                         ),
                       ),
                     ),
@@ -316,7 +324,9 @@ class _PostFormState extends State<PostForm> {
                       child: Text(
                         '배송',
                         style: TextStyle(
-                          color: selectedOption == '배송' ? Colors.white : Colors.black,
+                          color: selectedOption == '배송'
+                              ? Colors.white
+                              : Colors.black,
                         ),
                       ),
                     ),
@@ -331,22 +341,22 @@ class _PostFormState extends State<PostForm> {
               decoration: const InputDecoration(
                 labelText: '내용을 입력하세요.',
                 border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 10.0),
+                contentPadding:
+                    EdgeInsets.symmetric(vertical: 16.0, horizontal: 10.0),
               ),
               maxLines: null, // 다중 줄 입력 가능하도록 설정
               controller: _contentController, // 추가
             ),
-
 
             const SizedBox(height: 16), // 간격 조절
             // 게시글 업로드 버튼
 
             ElevatedButton(
               onPressed: () {
-                if(userState != null) {
+                if (userState != null) {
                   submitData(); // 게시글 업로드 처리
                 }
-                else{
+                else {
                   showDialog(
                       context: context,
                       builder: (BuildContext context) {
