@@ -9,16 +9,15 @@ class ChatRoomListPage extends StatefulWidget {
 
 class _ChatRoomListPageState extends State<ChatRoomListPage> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  late CollectionReference _chatRoomsCollection;
   late Stream<List<QueryDocumentSnapshot>> _chatRoomsStream;
   late String _currentUser;
 
   @override
   void initState() {
     super.initState();
-    _chatRoomsCollection = _firestore.collection('chatRooms');
     _currentUser = FirebaseAuth.instance.currentUser!.uid;
-    _chatRoomsStream = _chatRoomsCollection
+    _chatRoomsStream = _firestore
+        .collection('chatRooms')
         .where('users', arrayContains: _currentUser)
         .snapshots()
         .map((snapshot) => snapshot.docs.toList());
@@ -49,14 +48,13 @@ class _ChatRoomListPageState extends State<ChatRoomListPage> {
           }
 
           return ListView.builder(
-            itemCount: chatRooms.length,
+            itemCount: chatRooms.length > 0 ? chatRooms.length : 0,
             itemBuilder: (BuildContext context, int index) {
               final chatRoom = chatRooms[index];
               final chatRoomId = chatRoom.id;
               final chatRoomData = chatRoom.data() as Map<String, dynamic>;
               final users = chatRoomData['users'] as List<dynamic>;
-              final otherUser =
-              users.firstWhere((user) => user != _currentUser);
+              final otherUser = users.firstWhere((user) => user != _currentUser);
               return ListTile(
                 title: Text('상대방: $otherUser'),
                 subtitle: Text(chatRoomData['lastMessage']),
@@ -66,6 +64,7 @@ class _ChatRoomListPageState extends State<ChatRoomListPage> {
               );
             },
           );
+
         },
       ),
     );
@@ -170,10 +169,9 @@ class _ChatPageState extends State<ChatPage> {
           Expanded(
             child: StreamBuilder<List<QueryDocumentSnapshot>>(
               stream: _messagesStream,
-              builder: (BuildContext context,
-                  AsyncSnapshot<List<QueryDocumentSnapshot>> snapshot) {
+              builder: (BuildContext context, AsyncSnapshot<List<QueryDocumentSnapshot>> snapshot) {
                 if (snapshot.hasError) {
-                  return Text('오류 발생: ${snapshot.error}');
+                  return Text('Error: ${snapshot.error}');
                 }
 
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -183,7 +181,7 @@ class _ChatPageState extends State<ChatPage> {
                 final messages = snapshot.data;
 
                 if (messages == null || messages.isEmpty) {
-                  return Center(child: Text('메시지가 없습니다.'));
+                  return Center(child: Text('메세지가 없습니다.'));
                 }
 
                 return ListView.builder(
@@ -193,19 +191,22 @@ class _ChatPageState extends State<ChatPage> {
                     final message = messages[index];
                     final messageText = message['text'].toString();
                     final senderId = message['senderId'].toString();
-                    final isCurrentUser =
-                        senderId == FirebaseAuth.instance.currentUser!.uid;
+                    final isCurrentUser = senderId == FirebaseAuth.instance.currentUser!.uid;
 
                     return ListTile(
-                      title: Text(
-                        messageText,
-                        style: TextStyle(
-                          fontWeight: isCurrentUser
-                              ? FontWeight.bold
-                              : FontWeight.normal,
+                      title: Align(
+                        alignment: isCurrentUser ? Alignment.centerRight : Alignment.centerLeft,
+                        child: Text(
+                          messageText,
+                          style: TextStyle(
+                            fontWeight: isCurrentUser ? FontWeight.bold : FontWeight.normal,
+                          ),
                         ),
                       ),
-                      subtitle: Text(senderId),
+                      subtitle: Align(
+                        alignment: isCurrentUser ? Alignment.centerRight : Alignment.centerLeft,
+                        child: Text(senderId),
+                      ),
                     );
                   },
                 );
@@ -220,7 +221,7 @@ class _ChatPageState extends State<ChatPage> {
                   child: TextField(
                     controller: _messageController,
                     decoration: InputDecoration(
-                      hintText: '메시지 입력',
+                      hintText: '메세지 입력',
                     ),
                   ),
                 ),
