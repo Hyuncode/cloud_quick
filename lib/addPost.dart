@@ -15,6 +15,7 @@ Future<List> getLocation() async{
 }
 
 class PostForm extends StatefulWidget {
+
   @override
   _PostFormState createState() => _PostFormState();
 }

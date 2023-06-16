@@ -62,6 +62,7 @@ class _mapScreenState extends State<mapScreenState> {
   Future<List> getCurrentLocation() async {
   var latitude;
   var longitude;
+
   const String clientID = "qaji6jjpsa"; // naver client id
   const String id = "pewh3ot76c";
   const String clientSecret =
@@ -113,49 +114,3 @@ class _mapScreenState extends State<mapScreenState> {
   return location;
 }
 
-Future<List> convertLocation(List location) async {
-  String lat = location[0].toString();
-  String lon = location[1].toString();
-  const String clientID = "qaji6jjpsa"; // naver client id
-  const String clientSecret =
-      "FKgN6yhINBcuXrUDC62ChOAbTevYiVEviRQWTO9g"; // naver secret key
-
-  String url = "https://naveropenapi.apigw.ntruss.com/map-reversegeocode/v2/gc?"
-      "coords=126.8343943, 37.5604629&"
-      "sourcecrs=epsg:4326&"
-      "output=json&"
-      "orders=roadaddr";
-
-  Map<String, String> naverID = {
-    "X-NCP-APIGW-API-KEY-ID": "qaji6jjpsa", // 개인 클라이언트 아이디
-    "X-NCP-APIGW-API-KEY": "FKgN6yhINBcuXrUDC62ChOAbTevYiVEviRQWTO9g" // 개인 시크릿 키
-  };
-
-  print(lon);
-  print(lat);
-  /*
-  Response response = await get(
-    Uri.parse(
-      "https://naveropenapi.apigw.ntruss.com/map-reversegeocode/v2/gc?request=coordsToaddr&coords=$lon,$lat&sourcecers=epsg:4326&output=json"
-    ),
-    headers: naverID);
-   */
-  http.Response response = await http.get(
-    Uri.parse(url),
-    headers: {
-      "X-NCP-APIGW-API-KEY-ID": clientID,
-      "X-NCP-APIGW-API-KEY": clientSecret,
-    },
-  );
-  print(response.statusCode);
-  String locationData = response.body;
-  print(locationData);
-
-  var location2 =
-      jsonDecode(locationData)["result"][1]['region']['area2']['name'];
-  var location1 =
-      jsonDecode(locationData)["result"][1]['region']['area1']['name'];
-
-  List<String> convertedData = [location1, location2];
-  return convertedData;
-}
