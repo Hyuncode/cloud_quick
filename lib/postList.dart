@@ -173,7 +173,6 @@ class MainPost extends StatefulWidget {
 
 class _MainPostState extends State<MainPost> {
   final CollectionReference main_db =
-
   FirebaseFirestore.instance.collection('list');
 
   late String startPosition = "";
@@ -182,11 +181,9 @@ class _MainPostState extends State<MainPost> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       /*appBar: AppBar(
         title: const Text('메인 게시물'),
       ),*/
-
       body: Column(
         children: [
           TextField(
@@ -262,8 +259,7 @@ class _MainPostState extends State<MainPost> {
 }
 
 class PostPage extends StatefulWidget {
-  final QueryDocumentSnapshot document;
-
+  final document;
   const PostPage(this.document);
 
   @override

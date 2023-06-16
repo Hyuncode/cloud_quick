@@ -1,3 +1,4 @@
+import 'package:code/delivery.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'map.dart';
@@ -29,7 +30,7 @@ class _unloginMainPageState extends State<unloginMainPage> {
     const RequestPostList(), // 의뢰 탭
     const PerformPostList(), // 배송 탭
     const MainPost(), // 홈탭
-    const mapScreen(),
+    const deliverPage(),
     UserPage(), // 마이페이지 탭
   ];
 
