@@ -306,7 +306,6 @@ class _PostPageState extends State<PostPage> {
     }
 
     final chatRoomsRef = FirebaseFirestore.instance.collection('chatRooms');
-
     final existingChatRoomQuery = chatRoomsRef.where('postId', isEqualTo: postId).where('users', arrayContains: [currentUser.uid, userId]);
     final existingChatRoomSnapshot = await existingChatRoomQuery.get();
 
