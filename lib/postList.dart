@@ -182,10 +182,6 @@ class _MainPostState extends State<MainPost> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      /*appBar: AppBar(
-        title: const Text('메인 게시물'),
-      ),*/
-
       body: Column(
         children: [
           TextField(
@@ -265,7 +261,8 @@ class _MainPostState extends State<MainPost> {
 }
 
 class PostPage extends StatefulWidget {
-  final document;
+  final QueryDocumentSnapshot document;
+
   const PostPage(this.document);
 
   @override
@@ -475,4 +472,3 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 }
-
