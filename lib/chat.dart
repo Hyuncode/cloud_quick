@@ -170,10 +170,9 @@ class _ChatPageState extends State<ChatPage> {
           Expanded(
             child: StreamBuilder<List<QueryDocumentSnapshot>>(
               stream: _messagesStream,
-              builder: (BuildContext context,
-                  AsyncSnapshot<List<QueryDocumentSnapshot>> snapshot) {
+              builder: (BuildContext context, AsyncSnapshot<List<QueryDocumentSnapshot>> snapshot) {
                 if (snapshot.hasError) {
-                  return Text('오류 발생: ${snapshot.error}');
+                  return Text('Error: ${snapshot.error}');
                 }
 
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -183,7 +182,7 @@ class _ChatPageState extends State<ChatPage> {
                 final messages = snapshot.data;
 
                 if (messages == null || messages.isEmpty) {
-                  return Center(child: Text('메시지가 없습니다.'));
+                  return Center(child: Text('메세지가 없습니다.'));
                 }
 
                 return ListView.builder(
@@ -193,19 +192,22 @@ class _ChatPageState extends State<ChatPage> {
                     final message = messages[index];
                     final messageText = message['text'].toString();
                     final senderId = message['senderId'].toString();
-                    final isCurrentUser =
-                        senderId == FirebaseAuth.instance.currentUser!.uid;
+                    final isCurrentUser = senderId == FirebaseAuth.instance.currentUser!.uid;
 
                     return ListTile(
-                      title: Text(
-                        messageText,
-                        style: TextStyle(
-                          fontWeight: isCurrentUser
-                              ? FontWeight.bold
-                              : FontWeight.normal,
+                      title: Align(
+                        alignment: isCurrentUser ? Alignment.centerRight : Alignment.centerLeft,
+                        child: Text(
+                          messageText,
+                          style: TextStyle(
+                            fontWeight: isCurrentUser ? FontWeight.bold : FontWeight.normal,
+                          ),
                         ),
                       ),
-                      subtitle: Text(senderId),
+                      subtitle: Align(
+                        alignment: isCurrentUser ? Alignment.centerRight : Alignment.centerLeft,
+                        child: Text(senderId),
+                      ),
                     );
                   },
                 );
@@ -220,7 +222,7 @@ class _ChatPageState extends State<ChatPage> {
                   child: TextField(
                     controller: _messageController,
                     decoration: InputDecoration(
-                      hintText: '메시지 입력',
+                      hintText: '메세지 입력',
                     ),
                   ),
                 ),
@@ -235,6 +237,7 @@ class _ChatPageState extends State<ChatPage> {
       ),
     );
   }
+
 
   void _sendMessage() {
     final messageText = _messageController.text.trim();

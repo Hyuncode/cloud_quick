@@ -5,6 +5,7 @@ import 'postList.dart';
 import 'UserPage.dart';
 import 'addPost.dart';
 import 'chat.dart';
+import 'chatPage.dart';
 
 class loginPage extends StatelessWidget {
   @override
@@ -64,14 +65,7 @@ class _unloginMainPageState extends State<unloginMainPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-
                   builder: (context) => ChatRoomListPage(),
-
-                  builder: (context) => ChatPage(
-                    chatRoomId: 'your_chat_room_id_here',
-                    chatRoom: {},
-                  ),
-
                 ),
               );
             },
@@ -123,11 +117,3 @@ class PostListPage extends StatelessWidget {
     return const Center(child: Text('게시글 목록'));
   }
 }
-
-/*
-합배송 제안
-  합배송 물품 비슷한 지역&시간대네 묶어버려서 추천하기 (디비 내에서)
-의뢰글 추천순
-
-최종에는 데이터 핸들링하는 거도 보여주는 게 (데이터 1000개, 2000개 동시성 제어)
-*/
