@@ -3,23 +3,22 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ChatRoomListPage extends StatefulWidget {
-
   @override
   _ChatRoomListPageState createState() => _ChatRoomListPageState();
 }
 
 class _ChatRoomListPageState extends State<ChatRoomListPage> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  late CollectionReference _chatRoomsCollection;
+
   late Stream<List<QueryDocumentSnapshot>> _chatRoomsStream;
   late String _currentUser;
 
   @override
   void initState() {
     super.initState();
-    _chatRoomsCollection = _firestore.collection('chatRooms');
     _currentUser = FirebaseAuth.instance.currentUser!.uid;
-    _chatRoomsStream = _chatRoomsCollection
+    _chatRoomsStream = _firestore
+        .collection('chatRooms')
         .where('users', arrayContains: _currentUser)
         .snapshots()
         .map((snapshot) => snapshot.docs.toList());
@@ -50,14 +49,13 @@ class _ChatRoomListPageState extends State<ChatRoomListPage> {
           }
 
           return ListView.builder(
-            itemCount: chatRooms.length,
+            itemCount: chatRooms.length > 0 ? chatRooms.length : 0,
             itemBuilder: (BuildContext context, int index) {
               final chatRoom = chatRooms[index];
               final chatRoomId = chatRoom.id;
               final chatRoomData = chatRoom.data() as Map<String, dynamic>;
               final users = chatRoomData['users'] as List<dynamic>;
-              final otherUser =
-              users.firstWhere((user) => user != _currentUser);
+              final otherUser = users.firstWhere((user) => user != _currentUser);
               return ListTile(
                 title: Text('상대방: $otherUser'),
                 subtitle: Text(chatRoomData['lastMessage']),
@@ -72,8 +70,7 @@ class _ChatRoomListPageState extends State<ChatRoomListPage> {
     );
   }
 
-  void _navigateToChatPage(
-      Map<String, dynamic>? chatRoomData, String chatRoomId) async {
+  void _navigateToChatPage(Map<String, dynamic>? chatRoomData, String chatRoomId) async {
     final currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -86,7 +83,8 @@ class _ChatRoomListPageState extends State<ChatRoomListPage> {
 
     final existingChatRoomQuery = chatRoomsRef
         .where('users', arrayContains: currentUser.uid)
-        .where('users', arrayContains: chatRoomData?['userId']);
+        .where('users', arrayContains: chatRoomData?['userId'])
+        .where('postId', isEqualTo: chatRoomData?['postId']);
     final existingChatRoomSnapshot = await existingChatRoomQuery.get();
 
     if (existingChatRoomSnapshot.docs.isNotEmpty) {
@@ -102,6 +100,7 @@ class _ChatRoomListPageState extends State<ChatRoomListPage> {
       );
     } else {
       final chatRoom = {
+        'postId': chatRoomData?['postId'],
         'users': [currentUser.uid, chatRoomData?['userId']],
         'lastMessage': '',
         'lastMessageTime': Timestamp.now(),
@@ -124,6 +123,7 @@ class _ChatRoomListPageState extends State<ChatRoomListPage> {
       });
     }
   }
+
 }
 
 class ChatPage extends StatefulWidget {
@@ -238,7 +238,6 @@ class _ChatPageState extends State<ChatPage> {
       ),
     );
   }
-
 
   void _sendMessage() {
     final messageText = _messageController.text.trim();
