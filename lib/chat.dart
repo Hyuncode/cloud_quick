@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ChatRoomListPage extends StatefulWidget {
+
   @override
   _ChatRoomListPageState createState() => _ChatRoomListPageState();
 }
@@ -237,6 +238,7 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
+
   void _sendMessage() {
     final messageText = _messageController.text.trim();
 
@@ -267,3 +269,4 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+

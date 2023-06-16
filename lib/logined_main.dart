@@ -1,3 +1,4 @@
+import 'package:code/delivery.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'map.dart';
@@ -29,7 +30,7 @@ class _unloginMainPageState extends State<unloginMainPage> {
     const RequestPostList(), // 의뢰 탭
     const PerformPostList(), // 배송 탭
     const MainPost(), // 홈탭
-    const mapScreen(),
+    const deliverPage(),
     UserPage(), // 마이페이지 탭
   ];
 
@@ -113,15 +114,6 @@ class _unloginMainPageState extends State<unloginMainPage> {
 class PostListPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // TODO: 게시글 목록을 가져와서 출력하는 코드 작성
     return const Center(child: Text('게시글 목록'));
   }
 }
-
-/*
-합배송 제안
-  합배송 물품 비슷한 지역&시간대네 묶어버려서 추천하기 (디비 내에서)
-의뢰글 추천순
-
-최종에는 데이터 핸들링하는 거도 보여주는 게 (데이터 1000개, 2000개 동시성 제어)
-*/

@@ -43,16 +43,6 @@ class Authentication extends StatelessWidget {
     return const SignInScreen(
         providerConfigs: [
         EmailProviderConfiguration()],);
-    /*return StreamBuilder(
-        stream: FirebaseAuth.instance.authStateChanges(),
-        builder: (context, snapshot){
-          if(!snapshot.hasData) {
 
-              ],
-            );
-          }
-          return MyApp();
-        }
-    );*/
   }
 }
