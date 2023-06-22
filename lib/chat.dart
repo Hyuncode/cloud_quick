@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
+import 'package:badges/badges.dart';
 
 class ChatRoomListPage extends StatefulWidget {
   @override
@@ -70,7 +72,8 @@ class _ChatRoomListPageState extends State<ChatRoomListPage> {
     );
   }
 
-  void _navigateToChatPage(Map<String, dynamic>? chatRoomData, String chatRoomId) async {
+  void _navigateToChatPage(
+      Map<String, dynamic>? chatRoomData, String chatRoomId) async {
     final currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -83,8 +86,7 @@ class _ChatRoomListPageState extends State<ChatRoomListPage> {
 
     final existingChatRoomQuery = chatRoomsRef
         .where('users', arrayContains: currentUser.uid)
-        .where('users', arrayContains: chatRoomData?['userId'])
-        .where('postId', isEqualTo: chatRoomData?['postId']);
+        .where('users', arrayContains: chatRoomData?['userId']);
     final existingChatRoomSnapshot = await existingChatRoomQuery.get();
 
     if (existingChatRoomSnapshot.docs.isNotEmpty) {
@@ -100,7 +102,6 @@ class _ChatRoomListPageState extends State<ChatRoomListPage> {
       );
     } else {
       final chatRoom = {
-        'postId': chatRoomData?['postId'],
         'users': [currentUser.uid, chatRoomData?['userId']],
         'lastMessage': '',
         'lastMessageTime': Timestamp.now(),
@@ -123,7 +124,6 @@ class _ChatRoomListPageState extends State<ChatRoomListPage> {
       });
     }
   }
-
 }
 
 class ChatPage extends StatefulWidget {
@@ -150,7 +150,7 @@ class _ChatPageState extends State<ChatPage> {
     _messagesStream = _messagesCollection
         .orderBy('timestamp', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs.toList());
+        .map<List<QueryDocumentSnapshot>>((snapshot) => snapshot.docs.toList());
     _messageController = TextEditingController();
   }
 
@@ -191,8 +191,13 @@ class _ChatPageState extends State<ChatPage> {
                   itemCount: messages.length,
                   itemBuilder: (BuildContext context, int index) {
                     final message = messages[index];
-                    final messageText = message['text'].toString();
-                    final senderId = message['senderId'].toString();
+                    final messageData = message.data() as Map<String, dynamic>;
+                    final messageText = messageData['text'].toString();
+                    final senderId = messageData['senderId'].toString();
+                    final timestamp = (messageData['timestamp'] as Timestamp).toDate();
+                    final timeFormat = DateFormat('HH:mm');
+                    final timeString = timeFormat.format(timestamp);
+
                     final isCurrentUser = senderId == FirebaseAuth.instance.currentUser!.uid;
 
                     return ListTile(
@@ -207,7 +212,7 @@ class _ChatPageState extends State<ChatPage> {
                       ),
                       subtitle: Align(
                         alignment: isCurrentUser ? Alignment.centerRight : Alignment.centerLeft,
-                        child: Text(senderId),
+                        child: Text(timeString),
                       ),
                     );
                   },

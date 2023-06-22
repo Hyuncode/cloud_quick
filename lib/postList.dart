@@ -268,20 +268,76 @@ class PostPage extends StatefulWidget {
 }
 
 class _PostPageState extends State<PostPage> {
+  late final String currentUserId;
+
+  @override
+  void initState() {
+    super.initState();
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      currentUserId = currentUser.uid;
+    } else {
+      currentUserId = '';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final document = widget.document;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.document['postTitle']),
+        title: Text(''), // Empty app bar title
       ),
       body: Column(
         children: [
-          Text(widget.document['content']),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '제목: ${document['postTitle']}',
+                  style: TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '게시자: ${document['userId']}',
+                  style: TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '${document['postOption']} 게시글',
+                  style: TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '내용: ${document['content']}',
+                  style: TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '카테고리: ${document['category']}',
+                  style: TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '출발지: ${document['postStart']}',
+                  style: TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '도착지: ${document['postEnd']}',
+                  style: TextStyle(fontSize: 16),
+                ),
+              ],
+            ),
+          ),
           ElevatedButton(
             onPressed: () {
               _createChatRoom(
-                widget.document['userId'],
-                widget.document.id,
+                document['userId'],
+                document.id,
               );
             },
             child: const Text('채팅하기'),
@@ -292,8 +348,7 @@ class _PostPageState extends State<PostPage> {
   }
 
   void _createChatRoom(String userId, String postId) async {
-    final currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser == null) {
+    if (currentUserId.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('로그인이 필요합니다.')),
       );
@@ -302,7 +357,9 @@ class _PostPageState extends State<PostPage> {
 
     final chatRoomsRef = FirebaseFirestore.instance.collection('chatRooms');
 
-    final existingChatRoomQuery = chatRoomsRef.where('postId', isEqualTo: postId).where('users', arrayContains: [currentUser.uid, userId]);
+    final existingChatRoomQuery = chatRoomsRef
+        .where('postId', isEqualTo: postId)
+        .where('users', arrayContains: [currentUserId, userId]);
     final existingChatRoomSnapshot = await existingChatRoomQuery.get();
 
     if (existingChatRoomSnapshot.docs.isNotEmpty) {
@@ -319,7 +376,7 @@ class _PostPageState extends State<PostPage> {
     } else {
       final chatRoom = {
         'postId': postId,
-        'users': [currentUser.uid, userId],
+        'users': [currentUserId, userId],
         'lastMessage': '',
         'lastMessageTime': Timestamp.now(),
       };
@@ -415,18 +472,33 @@ class _ChatPageState extends State<ChatPage> {
                     final message = messages[index];
                     final messageText = message['text'].toString();
                     final senderId = message['senderId'].toString();
+                    final time = (message['timestamp'] as Timestamp).toDate();
+                    final formattedTime =
+                        '${time.hour}:${time.minute}';
+
                     final isCurrentUser =
                         senderId == FirebaseAuth.instance.currentUser!.uid;
 
                     return ListTile(
-                      title: Text(
-                        messageText,
-                        style: TextStyle(
-                          fontWeight:
-                          isCurrentUser ? FontWeight.bold : FontWeight.normal,
+                      title: Align(
+                        alignment: isCurrentUser
+                            ? Alignment.centerRight
+                            : Alignment.centerLeft,
+                        child: Text(
+                          messageText,
+                          style: TextStyle(
+                            fontWeight: isCurrentUser
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                          ),
                         ),
                       ),
-                      subtitle: Text(senderId),
+                      subtitle: Align(
+                        alignment: isCurrentUser
+                            ? Alignment.centerRight
+                            : Alignment.centerLeft,
+                        child: Text(formattedTime),
+                      ),
                     );
                   },
                 );
