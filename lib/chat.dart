@@ -1,25 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
+import 'package:badges/badges.dart';
 
 class ChatRoomListPage extends StatefulWidget {
-
   @override
   _ChatRoomListPageState createState() => _ChatRoomListPageState();
 }
 
 class _ChatRoomListPageState extends State<ChatRoomListPage> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  late CollectionReference _chatRoomsCollection;
+
   late Stream<List<QueryDocumentSnapshot>> _chatRoomsStream;
   late String _currentUser;
 
   @override
   void initState() {
     super.initState();
-    _chatRoomsCollection = _firestore.collection('chatRooms');
     _currentUser = FirebaseAuth.instance.currentUser!.uid;
-    _chatRoomsStream = _chatRoomsCollection
+    _chatRoomsStream = _firestore
+        .collection('chatRooms')
         .where('users', arrayContains: _currentUser)
         .snapshots()
         .map((snapshot) => snapshot.docs.toList());
@@ -50,14 +51,13 @@ class _ChatRoomListPageState extends State<ChatRoomListPage> {
           }
 
           return ListView.builder(
-            itemCount: chatRooms.length,
+            itemCount: chatRooms.length > 0 ? chatRooms.length : 0,
             itemBuilder: (BuildContext context, int index) {
               final chatRoom = chatRooms[index];
               final chatRoomId = chatRoom.id;
               final chatRoomData = chatRoom.data() as Map<String, dynamic>;
               final users = chatRoomData['users'] as List<dynamic>;
-              final otherUser =
-              users.firstWhere((user) => user != _currentUser);
+              final otherUser = users.firstWhere((user) => user != _currentUser);
               return ListTile(
                 title: Text('상대방: $otherUser'),
                 subtitle: Text(chatRoomData['lastMessage']),
@@ -67,6 +67,7 @@ class _ChatRoomListPageState extends State<ChatRoomListPage> {
               );
             },
           );
+
         },
       ),
     );
@@ -150,7 +151,7 @@ class _ChatPageState extends State<ChatPage> {
     _messagesStream = _messagesCollection
         .orderBy('timestamp', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs.toList());
+        .map<List<QueryDocumentSnapshot>>((snapshot) => snapshot.docs.toList());
     _messageController = TextEditingController();
   }
 
@@ -199,8 +200,12 @@ class _ChatPageState extends State<ChatPage> {
                   itemCount: messages.length,
                   itemBuilder: (BuildContext context, int index) {
                     final message = messages[index];
-                    final messageText = message['text'].toString();
-                    final senderId = message['senderId'].toString();
+                    final messageData = message.data() as Map<String, dynamic>;
+                    final messageText = messageData['text'].toString();
+                    final senderId = messageData['senderId'].toString();
+                    final timestamp = (messageData['timestamp'] as Timestamp).toDate();
+                    final timeFormat = DateFormat('HH:mm');
+                    final timeString = timeFormat.format(timestamp);
                     final isCurrentUser = senderId == FirebaseAuth.instance.currentUser!.uid;
 
                     return ListTile(
@@ -215,7 +220,7 @@ class _ChatPageState extends State<ChatPage> {
                       ),
                       subtitle: Align(
                         alignment: isCurrentUser ? Alignment.centerRight : Alignment.centerLeft,
-                        child: Text(senderId),
+                        child: Text(timeString),
                       ),
                     );
                   },

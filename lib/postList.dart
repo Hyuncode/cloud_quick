@@ -3,11 +3,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geolocator/geolocator.dart';
 
-Future<List> getLocation() async{
+Future<List> getLocation() async {
   Position position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high);
+    desiredAccuracy: LocationAccuracy.high,
+  );
 
-  List<String> location = [position.latitude.toString(), position.longitude.toString()];
+  List<String> location = [
+    position.latitude.toString(),
+    position.longitude.toString(),
+  ];
   return location;
 }
 
@@ -29,9 +33,9 @@ class RequestList extends StatefulWidget {
 
 class _RequestListState extends State<RequestList> {
   final Stream<QuerySnapshot> collectionStream =
-      FirebaseFirestore.instance.collection('list').snapshots();
+  FirebaseFirestore.instance.collection('list').snapshots();
   final CollectionReference postList =
-      FirebaseFirestore.instance.collection('list');
+  FirebaseFirestore.instance.collection('list');
   final Query db_r = FirebaseFirestore.instance
       .collection('list')
       .where("postOption", isEqualTo: "의뢰");
@@ -49,8 +53,7 @@ class _RequestListState extends State<RequestList> {
             return Text('로딩 중...');
           }
           return ListView(
-            children:
-            snapshot.data!.docs.map((QueryDocumentSnapshot document) {
+            children: snapshot.data!.docs.map((QueryDocumentSnapshot document) {
               return GestureDetector(
                 onTap: () {
                   Navigator.push(
@@ -100,12 +103,11 @@ class PerformList extends StatefulWidget {
 }
 
 class _PerformListState extends State<PerformList> {
-
   final Stream<QuerySnapshot> collectionStream =
-      FirebaseFirestore.instance.collection('list').snapshots();
+  FirebaseFirestore.instance.collection('list').snapshots();
 
   final CollectionReference postList =
-      FirebaseFirestore.instance.collection('list');
+  FirebaseFirestore.instance.collection('list');
 
   final Query db_p = FirebaseFirestore.instance
       .collection('list')
@@ -121,8 +123,7 @@ class _PerformListState extends State<PerformList> {
             return const Text("로딩 중...");
           }
           return ListView(
-            children:
-            snapshot.data!.docs.map((QueryDocumentSnapshot document) {
+            children: snapshot.data!.docs.map((QueryDocumentSnapshot document) {
               return GestureDetector(
                 onTap: () {
                   Navigator.push(
@@ -162,9 +163,6 @@ class _MainPostState extends State<MainPost> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      /*appBar: AppBar(
-        title: const Text('메인 게시물'),
-      ),*/
       body: Column(
         children: [
           TextField(
@@ -203,36 +201,40 @@ class _MainPostState extends State<MainPost> {
           ),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-                  stream: main_db
-                      .where("postStart", isEqualTo: startPosition)
-                      .snapshots(),
-                  builder: (BuildContext context,
-                      AsyncSnapshot<QuerySnapshot> snapshot) {
-                    if (snapshot.hasError) {
-                      return Text('오류 발생: ${snapshot.error}');
-                    }
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Text('로딩 중...');
-                    }
-                    return ListView(
-                      children: snapshot.data!.docs
-                          .map((QueryDocumentSnapshot document) {
-                        return GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => PostPage(document)),
-                            );
-                          },
-                          child: ListTile(
-                            title: Text(document['postTitle']),
-                            subtitle: Text(document['content']),
-                          ),
-                        );
-                      }).toList(),
-                    );
-                  }))
+              stream: main_db
+                  .where("postStart", isEqualTo: startPosition)
+                  .snapshots(),
+              builder:
+                  (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                if (snapshot.hasError) {
+                  return Text('오류 발생: ${snapshot.error}');
+                }
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Text('로딩 중...');
+                }
+                return ListView(
+                  children: snapshot.data!.docs.map(
+                        (QueryDocumentSnapshot document) {
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => PostPage(document),
+                            ),
+                          );
+                        },
+                        child: ListTile(
+                          title: Text(document['postTitle']),
+                          subtitle: Text(document['content']),
+                        ),
+                      );
+                    },
+                  ).toList(),
+                );
+              },
+            ),
+          ),
         ],
       ),
     );
@@ -240,7 +242,8 @@ class _MainPostState extends State<MainPost> {
 }
 
 class PostPage extends StatefulWidget {
-  final document;
+  final QueryDocumentSnapshot document;
+
   const PostPage(this.document);
 
   @override
@@ -248,18 +251,77 @@ class PostPage extends StatefulWidget {
 }
 
 class _PostPageState extends State<PostPage> {
+  late final String currentUserId;
+
+  @override
+  void initState() {
+    super.initState();
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      currentUserId = currentUser.uid;
+    } else {
+      currentUserId = '';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final document = widget.document;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.document['postTitle']),
+        title: Text(''), // Empty app bar title
       ),
       body: Column(
         children: [
-          Text(widget.document['content']),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '제목: ${document['postTitle']}',
+                  style: TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '게시자: ${document['userId']}',
+                  style: TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '${document['postOption']} 게시글',
+                  style: TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '내용: ${document['content']}',
+                  style: TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '카테고리: ${document['category']}',
+                  style: TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '출발지: ${document['postStart']}',
+                  style: TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '도착지: ${document['postEnd']}',
+                  style: TextStyle(fontSize: 16),
+                ),
+              ],
+            ),
+          ),
           ElevatedButton(
             onPressed: () {
-              _createChatRoom(widget.document['userId']);
+              _createChatRoom(
+                document['userId'],
+                document.id,
+              );
             },
             child: const Text('채팅하기'),
           ),
@@ -268,10 +330,8 @@ class _PostPageState extends State<PostPage> {
     );
   }
 
-
-  void _createChatRoom(String userId) async {
-    final currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser == null) {
+  void _createChatRoom(String userId, String postId) async {
+    if (currentUserId.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('로그인이 필요합니다.')),
       );
@@ -280,8 +340,10 @@ class _PostPageState extends State<PostPage> {
 
     final chatRoomsRef = FirebaseFirestore.instance.collection('chatRooms');
 
-    final existingChatRoomQuery =
-    chatRoomsRef.where('users', arrayContains: [currentUser.uid, userId]);
+    final existingChatRoomQuery = chatRoomsRef
+        .where('postId', isEqualTo: postId)
+        .where('users', arrayContains: [currentUserId, userId]);
+    
     final existingChatRoomSnapshot = await existingChatRoomQuery.get();
 
     if (existingChatRoomSnapshot.docs.isNotEmpty) {
@@ -297,7 +359,8 @@ class _PostPageState extends State<PostPage> {
       );
     } else {
       final chatRoom = {
-        'users': [currentUser.uid, userId],
+        'postId': postId,
+        'users': [currentUserId, userId],
         'lastMessage': '',
         'lastMessageTime': Timestamp.now(),
       };
@@ -344,8 +407,8 @@ class _ChatPageState extends State<ChatPage> {
   @override
   void initState() {
     super.initState();
-    _messagesCollection =
-        _firestore.collection('chatRooms/${widget.chatRoomId}/messages');
+    _messagesCollection = _firestore
+        .collection('chatRooms/${widget.chatRoomId}/messages');
     _messagesStream = _messagesCollection
         .orderBy('timestamp', descending: true)
         .snapshots()
@@ -393,18 +456,33 @@ class _ChatPageState extends State<ChatPage> {
                     final message = messages[index];
                     final messageText = message['text'].toString();
                     final senderId = message['senderId'].toString();
+                    final time = (message['timestamp'] as Timestamp).toDate();
+                    final formattedTime =
+                        '${time.hour}:${time.minute}';
+
                     final isCurrentUser =
                         senderId == FirebaseAuth.instance.currentUser!.uid;
 
                     return ListTile(
-                      title: Text(
-                        messageText,
-                        style: TextStyle(
-                          fontWeight:
-                          isCurrentUser ? FontWeight.bold : FontWeight.normal,
+                      title: Align(
+                        alignment: isCurrentUser
+                            ? Alignment.centerRight
+                            : Alignment.centerLeft,
+                        child: Text(
+                          messageText,
+                          style: TextStyle(
+                            fontWeight: isCurrentUser
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                          ),
                         ),
                       ),
-                      subtitle: Text(senderId),
+                      subtitle: Align(
+                        alignment: isCurrentUser
+                            ? Alignment.centerRight
+                            : Alignment.centerLeft,
+                        child: Text(formattedTime),
+                      ),
                     );
                   },
                 );
