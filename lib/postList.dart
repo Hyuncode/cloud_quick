@@ -2,8 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geolocator/geolocator.dart';
-import 'chat.dart';
-import "package:latlong2/latlong.dart";
 
 Future<List> getLocation() async {
   Position position = await Geolocator.getCurrentPosition(
@@ -182,10 +180,6 @@ class _MainPostState extends State<MainPost> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      /*appBar: AppBar(
-        title: const Text('메인 게시물'),
-      ),*/
-
       body: Column(
         children: [
           TextField(
@@ -265,7 +259,8 @@ class _MainPostState extends State<MainPost> {
 }
 
 class PostPage extends StatefulWidget {
-  final document;
+  final QueryDocumentSnapshot document;
+
   const PostPage(this.document);
 
   @override
@@ -273,20 +268,76 @@ class PostPage extends StatefulWidget {
 }
 
 class _PostPageState extends State<PostPage> {
+  late final String currentUserId;
+
+  @override
+  void initState() {
+    super.initState();
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      currentUserId = currentUser.uid;
+    } else {
+      currentUserId = '';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final document = widget.document;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.document['postTitle']),
+        title: Text(''), // Empty app bar title
       ),
       body: Column(
         children: [
-          Text(widget.document['content']),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '제목: ${document['postTitle']}',
+                  style: TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '게시자: ${document['userId']}',
+                  style: TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '${document['postOption']} 게시글',
+                  style: TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '내용: ${document['content']}',
+                  style: TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '카테고리: ${document['category']}',
+                  style: TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '출발지: ${document['postStart']}',
+                  style: TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '도착지: ${document['postEnd']}',
+                  style: TextStyle(fontSize: 16),
+                ),
+              ],
+            ),
+          ),
           ElevatedButton(
             onPressed: () {
               _createChatRoom(
-                widget.document['userId'],
-                widget.document.id,
+                document['userId'],
+                document.id,
               );
             },
             child: const Text('채팅하기'),
@@ -297,8 +348,7 @@ class _PostPageState extends State<PostPage> {
   }
 
   void _createChatRoom(String userId, String postId) async {
-    final currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser == null) {
+    if (currentUserId.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('로그인이 필요합니다.')),
       );
@@ -306,7 +356,11 @@ class _PostPageState extends State<PostPage> {
     }
 
     final chatRoomsRef = FirebaseFirestore.instance.collection('chatRooms');
-    final existingChatRoomQuery = chatRoomsRef.where('postId', isEqualTo: postId).where('users', arrayContains: [currentUser.uid, userId]);
+
+    final existingChatRoomQuery = chatRoomsRef
+        .where('postId', isEqualTo: postId)
+        .where('users', arrayContains: [currentUserId, userId]);
+    
     final existingChatRoomSnapshot = await existingChatRoomQuery.get();
 
     if (existingChatRoomSnapshot.docs.isNotEmpty) {
@@ -323,7 +377,7 @@ class _PostPageState extends State<PostPage> {
     } else {
       final chatRoom = {
         'postId': postId,
-        'users': [currentUser.uid, userId],
+        'users': [currentUserId, userId],
         'lastMessage': '',
         'lastMessageTime': Timestamp.now(),
       };
@@ -346,3 +400,147 @@ class _PostPageState extends State<PostPage> {
     }
   }
 }
+
+class ChatPage extends StatefulWidget {
+  final String chatRoomId;
+  final Map<String, dynamic> chatRoom;
+
+  const ChatPage({
+    Key? key,
+    required this.chatRoomId,
+    required this.chatRoom,
+  }) : super(key: key);
+
+  @override
+  _ChatPageState createState() => _ChatPageState();
+}
+
+class _ChatPageState extends State<ChatPage> {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  late CollectionReference _messagesCollection;
+  late Stream<List<QueryDocumentSnapshot>> _messagesStream;
+  late TextEditingController _messageController;
+
+  @override
+  void initState() {
+    super.initState();
+    _messagesCollection = _firestore
+        .collection('chatRooms/${widget.chatRoomId}/messages');
+    _messagesStream = _messagesCollection
+        .orderBy('timestamp', descending: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.toList());
+    _messageController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _messageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('채팅'),
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: StreamBuilder<List<QueryDocumentSnapshot>>(
+              stream: _messagesStream,
+              builder: (BuildContext context,
+                  AsyncSnapshot<List<QueryDocumentSnapshot>> snapshot) {
+                if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                }
+
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                }
+
+                final messages = snapshot.data;
+
+                if (messages == null || messages.isEmpty) {
+                  return Center(child: Text('메세지가 없습니다.'));
+                }
+
+                return ListView.builder(
+                  reverse: true,
+                  itemCount: messages.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    final message = messages[index];
+                    final messageText = message['text'].toString();
+                    final senderId = message['senderId'].toString();
+                    final time = (message['timestamp'] as Timestamp).toDate();
+                    final formattedTime =
+                        '${time.hour}:${time.minute}';
+
+                    final isCurrentUser =
+                        senderId == FirebaseAuth.instance.currentUser!.uid;
+
+                    return ListTile(
+                      title: Align(
+                        alignment: isCurrentUser
+                            ? Alignment.centerRight
+                            : Alignment.centerLeft,
+                        child: Text(
+                          messageText,
+                          style: TextStyle(
+                            fontWeight: isCurrentUser
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                          ),
+                        ),
+                      ),
+                      subtitle: Align(
+                        alignment: isCurrentUser
+                            ? Alignment.centerRight
+                            : Alignment.centerLeft,
+                        child: Text(formattedTime),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _messageController,
+                    decoration: InputDecoration(
+                      hintText: '메세지 입력',
+                    ),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: _sendMessage,
+                  child: Text('전송'),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _sendMessage() {
+    final messageText = _messageController.text.trim();
+
+    if (messageText.isNotEmpty) {
+      _messagesCollection.add({
+        'text': messageText,
+        'senderId': FirebaseAuth.instance.currentUser!.uid,
+        'timestamp': Timestamp.now(),
+      });
+      _messageController.clear();
+    }
+  }
+}
+

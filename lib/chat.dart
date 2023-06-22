@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
+import 'package:badges/badges.dart';
 
 class ChatRoomListPage extends StatefulWidget {
-
   @override
   _ChatRoomListPageState createState() => _ChatRoomListPageState();
 }
 
 class _ChatRoomListPageState extends State<ChatRoomListPage> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
   late Stream<List<QueryDocumentSnapshot>> _chatRoomsStream;
   late String _currentUser;
 
@@ -149,7 +151,7 @@ class _ChatPageState extends State<ChatPage> {
     _messagesStream = _messagesCollection
         .orderBy('timestamp', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs.toList());
+        .map<List<QueryDocumentSnapshot>>((snapshot) => snapshot.docs.toList());
     _messageController = TextEditingController();
   }
 
@@ -190,8 +192,13 @@ class _ChatPageState extends State<ChatPage> {
                   itemCount: messages.length,
                   itemBuilder: (BuildContext context, int index) {
                     final message = messages[index];
-                    final messageText = message['text'].toString();
-                    final senderId = message['senderId'].toString();
+                    final messageData = message.data() as Map<String, dynamic>;
+                    final messageText = messageData['text'].toString();
+                    final senderId = messageData['senderId'].toString();
+                    final timestamp = (messageData['timestamp'] as Timestamp).toDate();
+                    final timeFormat = DateFormat('HH:mm');
+                    final timeString = timeFormat.format(timestamp);
+
                     final isCurrentUser = senderId == FirebaseAuth.instance.currentUser!.uid;
 
                     return ListTile(
@@ -206,7 +213,7 @@ class _ChatPageState extends State<ChatPage> {
                       ),
                       subtitle: Align(
                         alignment: isCurrentUser ? Alignment.centerRight : Alignment.centerLeft,
-                        child: Text(senderId),
+                        child: Text(timeString),
                       ),
                     );
                   },
@@ -238,7 +245,6 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
-
   void _sendMessage() {
     final messageText = _messageController.text.trim();
 
@@ -269,4 +275,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
