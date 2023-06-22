@@ -166,6 +166,14 @@ class _ChatPageState extends State<ChatPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('채팅'),
+        actions: [
+          IconButton(
+              onPressed: (){
+
+              },
+              icon: const Icon(Icons.delivery_dining)
+          )
+        ],
       ),
       body: Column(
         children: [
@@ -198,7 +206,6 @@ class _ChatPageState extends State<ChatPage> {
                     final timestamp = (messageData['timestamp'] as Timestamp).toDate();
                     final timeFormat = DateFormat('HH:mm');
                     final timeString = timeFormat.format(timestamp);
-
                     final isCurrentUser = senderId == FirebaseAuth.instance.currentUser!.uid;
 
                     return ListTile(
@@ -244,6 +251,7 @@ class _ChatPageState extends State<ChatPage> {
       ),
     );
   }
+
 
   void _sendMessage() {
     final messageText = _messageController.text.trim();

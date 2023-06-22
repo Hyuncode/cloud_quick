@@ -1,4 +1,3 @@
-import 'package:code/map.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -356,6 +355,7 @@ class _PostFormState extends State<PostForm> {
               onPressed: () {
                 if (userState != null) {
                   submitData(); // 게시글 업로드 처리
+                  Navigator.pop(context);
                 }
                 else {
                   showDialog(

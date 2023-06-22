@@ -42,7 +42,8 @@ class Authentication extends StatelessWidget {
   Widget build(BuildContext context) {
     return const SignInScreen(
         providerConfigs: [
-        EmailProviderConfiguration()],);
-
+          EmailProviderConfiguration()
+        ],
+    );
   }
 }
