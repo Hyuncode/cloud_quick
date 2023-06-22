@@ -1,10 +1,11 @@
-import 'package:code/postList.dart';
+import 'package:code/Loginpage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 
+// 현재 위치 좌표 가져오기
 Future<List> getlocation() async{
   var latitude;
   var longitude;
@@ -24,7 +25,8 @@ Future<List> getlocation() async{
   List<double> location = [latitude, longitude];
   return location;
 }
-//-----------------------------------------------
+
+//배송 목록 화면
 class deliverPage extends StatefulWidget {
   const deliverPage({Key? key}) : super(key: key);
 
@@ -109,6 +111,7 @@ class _deliverPageState extends State<deliverPage> {
   }
 }
 
+// 배송 의뢰 화면
 class deliveryPage extends StatefulWidget {
   final QueryDocumentSnapshot document;
   const deliveryPage(this.document);
@@ -192,6 +195,8 @@ class _deliveryPageState extends State<deliveryPage> {
     );
   }
 }
+
+//배송 수행 화면
 class delivererPage extends StatefulWidget {
   final QueryDocumentSnapshot document;
   const delivererPage(this.document);
@@ -269,6 +274,50 @@ class _delivererPageState extends State<delivererPage> {
                         child: const Text("위치 인증"));
                   }
                 }
+            ),
+
+            ElevatedButton(
+                onPressed: (){
+
+                },
+                child: const Text("배송 완료"),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class unloginedDelivery extends StatefulWidget {
+  const unloginedDelivery({Key? key}) : super(key: key);
+
+  @override
+  State<unloginedDelivery> createState() => _unloginedDeliveryState();
+}
+
+class _unloginedDeliveryState extends State<unloginedDelivery> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Column(
+          children: <Widget>[
+            SizedBox(
+              height: 300,
+            ),
+            Container(
+              height: 50,
+              child: Text("로그인 후 이용하세요"),
+            ),
+            ElevatedButton(
+                onPressed: (){
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const loginScreen()),
+                  );
+                },
+                child: Text("로그인 하기")
             ),
           ],
         ),

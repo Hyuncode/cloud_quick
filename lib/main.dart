@@ -1,9 +1,11 @@
+import 'package:code/addUserInfo.dart';
+import 'package:code/logined_main.dart';
 import 'unlogined_main.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-import 'logined_main.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,6 +35,8 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
+  final db = FirebaseFirestore.instance.collection('UserInfo');
+  final user = FirebaseAuth.instance.currentUser;
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
@@ -49,7 +53,7 @@ class _MainPageState extends State<MainPage> {
 
 /*
 합배송 제안
-  합배송 물품 비슷한 지역&시간대네 묶어버려서 추천하기 (디비 내에서)
+  합배송 물품 비슷한 지역&시간대 묶어서 추천 하기 (디비 내에서)
 의뢰글 추천순
 
 최종에는 데이터 핸들링하는 거도 보여주는 게 (데이터 1000개, 2000개 동시성 제어)

@@ -1,9 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geolocator/geolocator.dart';
-import 'chat.dart';
-import "package:latlong2/latlong.dart";
 
 Future<List> getLocation() async{
   Position position = await Geolocator.getCurrentPosition(
@@ -11,23 +9,6 @@ Future<List> getLocation() async{
 
   List<String> location = [position.latitude.toString(), position.longitude.toString()];
   return location;
-}
-
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Chat App',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: RequestPostList(),
-    );
-  }
 }
 
 class RequestPostList extends StatelessWidget {

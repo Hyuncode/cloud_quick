@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:code/delivery.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -6,15 +7,26 @@ import 'postList.dart';
 import 'UserPage.dart';
 import 'addPost.dart';
 import 'chat.dart';
-import 'chatPage.dart';
+import 'addUserInfo.dart';
 
 class loginPage extends StatelessWidget {
+  final db = FirebaseFirestore.instance.collection('UserInfo');
+  final user = FirebaseAuth.instance.currentUser;
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return StreamBuilder(
+        stream: db.where("UID", isEqualTo: user?.uid).snapshots(),
+        builder: (BuildContext context, AsyncSnapshot snapshot){
+          if(snapshot.hasData){
+            return unloginMainPage();
+          }
+          return addUser();
+        }
+    );
+    /*return MaterialApp(
       title: '구름 배송',
       home: unloginMainPage(),
-    );
+    );*/
   }
 }
 
@@ -39,9 +51,23 @@ class _unloginMainPageState extends State<unloginMainPage> {
       _selectedIndex = index;
     });
   }
+  final user = FirebaseAuth.instance.currentUser;
+
+  /*Future<List<dynamic>> getniclData() async{
+    final nick = FirebaseFirestore.instance.
+    collection("UserInfo").where('UID', isEqualTo: user?.uid);
+    final data = nick.get();
+    List db = [];
+    db.add(data);
+    return db;
+}*/
 
   @override
   Widget build(BuildContext context) {
+    /*Future<List> db = getniclData();
+    if (db == null) {
+      return addUser();
+    }*/
     return Scaffold(
       appBar: AppBar(
         title: const Text('구름 배송'),
