@@ -52,12 +52,13 @@ class _RequestListState extends State<RequestList> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Text('로딩 중...');
           }
-          return ListView(
-            children: snapshot.data!.docs.map((QueryDocumentSnapshot document) {
-              final content = document['content'].toString();
-              final displayContent = content.length > 40
-                  ? content.substring(0, 40) + '...'
-                  : content;
+          return ListView.builder(
+            itemCount: snapshot.data!.docs.length,
+            itemBuilder: (BuildContext context, int index) {
+              final document = snapshot.data!.docs[index];
+              final postTitle = document['postTitle'];
+              final postStart = document['postStart'];
+              final postEnd = document['postEnd'];
 
               return GestureDetector(
                 onTap: () {
@@ -68,13 +69,35 @@ class _RequestListState extends State<RequestList> {
                     ),
                   );
                 },
-                child: ListTile(
-                  title: Text(document['postTitle']),
-                  subtitle: Text(displayContent),
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(color: Colors.grey),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ListTile(
+                        title: Text(postTitle),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Row(
+                          children: [
+                            Expanded(child: Text('출발지: $postStart')),
+                            Expanded(child: Text('도착지: $postEnd')),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               );
-            }).toList(),
+            },
           );
+
+
         },
       ),
     );
@@ -127,12 +150,13 @@ class _PerformListState extends State<PerformList> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Text("로딩 중...");
           }
-          return ListView(
-            children: snapshot.data!.docs.map((QueryDocumentSnapshot document) {
-              final content = document['content'].toString();
-              final displayContent = content.length > 40
-                  ? content.substring(0, 40) + '...'
-                  : content;
+          return ListView.builder(
+            itemCount: snapshot.data!.docs.length,
+            itemBuilder: (BuildContext context, int index) {
+              final document = snapshot.data!.docs[index];
+              final postTitle = document['postTitle'];
+              final postStart = document['postStart'];
+              final postEnd = document['postEnd'];
 
               return GestureDetector(
                 onTap: () {
@@ -143,12 +167,32 @@ class _PerformListState extends State<PerformList> {
                     ),
                   );
                 },
-                child: ListTile(
-                  title: Text(document['postTitle']),
-                  subtitle: Text(displayContent),
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(color: Colors.grey),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ListTile(
+                        title: Text(postTitle),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Row(
+                          children: [
+                            Expanded(child: Text('출발지: $postStart')),
+                            Expanded(child: Text('도착지: $postEnd')),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               );
-            }).toList(),
+            },
           );
         },
       ),
@@ -222,32 +266,51 @@ class _MainPostState extends State<MainPost> {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Text('로딩 중...');
                 }
-                return ListView(
-                  children: snapshot.data!.docs.map(
-                        (QueryDocumentSnapshot document) {
-                      final content = document['content'].toString();
-                      final displayContent = content.length > 40
-                          ? content.substring(0, 40) + '...'
-                          : content;
+                return ListView.builder(
+                  itemCount: snapshot.data!.docs.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    final document = snapshot.data!.docs[index];
+                    final postTitle = document['postTitle'];
+                    final postStart = document['postStart'];
+                    final postEnd = document['postEnd'];
 
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => PostPage(document),
-                            ),
-                          );
-                        },
-                        child: ListTile(
-                          title: Text(document['postTitle']),
-                          subtitle: Text(displayContent),
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PostPage(document),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border(
+                            bottom: BorderSide(color: Colors.grey),
+                          ),
                         ),
-                      );
-                    },
-                  ).toList(),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ListTile(
+                              title: Text(postTitle),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 16.0),
+                              child: Row(
+                                children: [
+                                  Expanded(child: Text('출발지: $postStart')),
+                                  Expanded(child: Text('도착지: $postEnd')),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
                 );
-              },
+                },
             ),
           ),
         ],
@@ -305,15 +368,21 @@ class _PostPageState extends State<PostPage> {
                   ],
                 ),
                 const SizedBox(height: 8),
+                Divider(), // Divider for the title
+                const SizedBox(height: 8),
                 Text(
-                  'userId: ${document['userId']}',
+                  '작성자: ${document['userId']}',
                   style: TextStyle(fontSize: 16),
                 ),
                 const SizedBox(height: 8),
+                Divider(), // Divider for the title
+
                 Text(
-                  'category: ${document['category']}',
+                  '카테고리: ${document['category']}',
                   style: TextStyle(fontSize: 16),
                 ),
+                const SizedBox(height: 8),
+                Divider(), // Divider for the start/end locations
                 const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -335,26 +404,33 @@ class _PostPageState extends State<PostPage> {
                   ],
                 ),
                 const SizedBox(height: 8),
+                Divider(), // Divider for the start/end locations
+                const SizedBox(height: 8),
                 Text(
-                  'content: ${document['content']}',
+                  '내용: ${document['content']}',
                   style: TextStyle(fontSize: 16),
                 ),
+                Divider(), // Divider for the title
               ],
             ),
           ),
-          ElevatedButton(
-            onPressed: () {
-              _createChatRoom(
-                document['userId'],
-                document.id,
-              );
-            },
-            child: const Text('채팅하기'),
+          Center(
+            child: ElevatedButton(
+              onPressed: () {
+                _createChatRoom(
+                  document['userId'],
+                  document.id,
+                );
+              },
+              child: const Text('채팅하기'),
+            ),
           ),
+
         ],
       ),
     );
   }
+
 
   void _createChatRoom(String userId, String postId) async {
     if (currentUserId.isEmpty) {
