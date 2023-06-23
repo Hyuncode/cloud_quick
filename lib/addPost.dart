@@ -52,7 +52,7 @@ class _PostFormState extends State<PostForm> {
         'category': selectedCategory,
         'userId': userState?.uid,
         'position_lat': position.latitude,
-        'position_lon': position.longitude
+        'position_lon': position.longitude,
       });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('added')),
@@ -355,7 +355,7 @@ class _PostFormState extends State<PostForm> {
               onPressed: () {
                 if (userState != null) {
                   submitData(); // 게시글 업로드 처리
-                  Navigator.pop(context);
+                  //Navigator.pop(context);
                 }
                 else {
                   showDialog(

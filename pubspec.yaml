@@ -48,6 +48,7 @@ dependencies:
   http: ^0.13.6
   latlong2: ^0.8.2
   badges: ^3.0.1
+  percent_indicator: ^4.2.3
 
 
   #dependency_overrides:

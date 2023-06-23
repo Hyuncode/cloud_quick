@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -143,6 +145,38 @@ class _ChatPageState extends State<ChatPage> {
   late Stream<List<QueryDocumentSnapshot>> _messagesStream;
   late TextEditingController _messageController;
 
+  void CreateDelivery() async{
+    CollectionReference database =
+    FirebaseFirestore.instance.collection('delivery');
+    final db = FirebaseFirestore.instance.collection('list');
+    final dbdoc = db.doc(widget.chatRoom!["postId"]);
+    final postdata = await dbdoc.get();
+
+    print(widget.chatRoom!['postId']);
+    print(postdata.data());
+    print(postdata.data()!['position_lat']);
+
+    try{
+      await database.add({
+        'deliver_uid' : widget.chatRoom!['users'][0],
+        'request_uid' : widget.chatRoom!['users'][1],
+        'locationCheck' : false,
+        'postID' : widget.chatRoom!['postId'].toString(),
+        'end_lat' : postdata['end_lat'],
+        'end_lon' : postdata['end_lon'],
+        'curr_lat' : postdata['position_lat'],
+        'curr_lon' : postdata['position_lon'],
+        'start_lat' : postdata['position_lat'],
+        'start_lon' : postdata['position_lon'],
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('배송 등록 성공')));
+    } catch(error){
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('배송 등록 실패')));
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -169,7 +203,7 @@ class _ChatPageState extends State<ChatPage> {
         actions: [
           IconButton(
               onPressed: (){
-
+                CreateDelivery();
               },
               icon: const Icon(Icons.delivery_dining)
           )

@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:percent_indicator/percent_indicator.dart';
 
 // 현재 위치 좌표 가져오기
 Future<List> getlocation() async{
@@ -125,24 +126,21 @@ class _deliveryPageState extends State<deliveryPage> {
   @override
   Widget build(BuildContext context) {
     final db = FirebaseFirestore.instance;
+    final postdata = db.collection('list').doc(widget.document['postID']);
 
-    getdata() async{
-      var postdata = await db.collection("list").doc(widget.document["postID"]).get();
-      print(postdata.data());
-      return postdata.data();
-    }
-
-    var postdb = getdata();
     var curr_lat = widget.document["curr_lat"];
     var curr_lon = widget.document["curr_lon"];
     var end_lat = widget.document["end_lat"];
     var end_lon = widget.document["end_lon"];
-
-    print("clat$curr_lat clon$curr_lon elat $end_lat elon $end_lon");
+    var start_lat = widget.document["start_lat"];
+    var start_lon = widget.document["start_lon"];
 
     var distance = Distance();
     final distance_meter =
       distance(LatLng(curr_lat, curr_lon), LatLng(end_lat, end_lon));
+    final alldistance =
+        distance(LatLng(start_lat, start_lon), LatLng(end_lat, end_lon));
+    var percent = ((alldistance - distance_meter)/alldistance);
 
     return Scaffold(
       appBar: AppBar(
@@ -150,22 +148,27 @@ class _deliveryPageState extends State<deliveryPage> {
       ),
       body: Center(
         child: Column(
-          children: <Widget>[
-            ListTile(
-              /*onTap: (){
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => PostPage(db)
-                    )
-                );
-              },*/
-              //TODO : link to postpage
-              title: const Text('게시글 링크 예정'),
+          children: [
+            StreamBuilder<DocumentSnapshot>(
+                stream: postdata.snapshots(),
+                builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot){
+                  return ListTile(
+                    onTap: (){
+
+                    },
+                    title: Text(snapshot.data!["postTitle"]),
+                    subtitle: Text(snapshot.data!["content"]),
+                  );
+                }
             ),
-            Text("현재 위치 : $curr_lat, $curr_lon"),
             Text("남은 거리 : $distance_meter m"),
-            Text(postdb.toString()),
+            SizedBox(height: 10,),
+            LinearPercentIndicator(
+              percent: percent,
+              backgroundColor: Colors.black26,
+              progressColor: Colors.lightBlueAccent,
+            ),
+            SizedBox(height: 10,),
             ElevatedButton(
               onPressed: (){
                 if(widget.document["locationCheck"] == true){
@@ -188,6 +191,13 @@ class _deliveryPageState extends State<deliveryPage> {
                 }
                 },
               child: const Text("위치 요청")
+            ),
+            SizedBox(height: 5,),
+            ElevatedButton(
+                onPressed: (){
+
+                },
+                child: Text("배송 완료"),
             )
           ],
         ),
@@ -275,13 +285,6 @@ class _delivererPageState extends State<delivererPage> {
                   }
                 }
             ),
-
-            ElevatedButton(
-                onPressed: (){
-
-                },
-                child: const Text("배송 완료"),
-            )
           ],
         ),
       ),
