@@ -4,6 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:badges/badges.dart';
 
+import 'postList.dart';
+
 class ChatRoomListPage extends StatefulWidget {
   @override
   _ChatRoomListPageState createState() => _ChatRoomListPageState();
@@ -11,19 +13,19 @@ class ChatRoomListPage extends StatefulWidget {
 
 class _ChatRoomListPageState extends State<ChatRoomListPage> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  late Stream<List<QueryDocumentSnapshot>> _chatRoomsStream;
+  late Stream<QuerySnapshot> _chatRoomsStream;
   late String _currentUser;
 
   @override
   void initState() {
     super.initState();
-    _currentUser = FirebaseAuth.instance.currentUser!.uid;
+    _currentUser = _auth.currentUser!.uid;
     _chatRoomsStream = _firestore
         .collection('chatRooms')
         .where('users', arrayContains: _currentUser)
-        .snapshots()
-        .map((snapshot) => snapshot.docs.toList());
+        .snapshots();
   }
 
   @override
@@ -32,10 +34,9 @@ class _ChatRoomListPageState extends State<ChatRoomListPage> {
       appBar: AppBar(
         title: Text('채팅방 목록'),
       ),
-      body: StreamBuilder<List<QueryDocumentSnapshot>>(
+      body: StreamBuilder<QuerySnapshot>(
         stream: _chatRoomsStream,
-        builder: (BuildContext context,
-            AsyncSnapshot<List<QueryDocumentSnapshot>> snapshot) {
+        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (snapshot.hasError) {
             return Text('오류 발생: ${snapshot.error}');
           }
@@ -44,25 +45,43 @@ class _ChatRoomListPageState extends State<ChatRoomListPage> {
             return Center(child: CircularProgressIndicator());
           }
 
-          final chatRooms = snapshot.data;
+          final chatRooms = snapshot.data?.docs;
 
           if (chatRooms == null || chatRooms.isEmpty) {
             return Center(child: Text('채팅방이 없습니다.'));
           }
 
           return ListView.builder(
-            itemCount: chatRooms.length > 0 ? chatRooms.length : 0,
+            itemCount: chatRooms.length,
             itemBuilder: (BuildContext context, int index) {
               final chatRoom = chatRooms[index];
               final chatRoomId = chatRoom.id;
               final chatRoomData = chatRoom.data() as Map<String, dynamic>;
-              final users = chatRoomData['users'] as List<dynamic>;
-              final otherUser = users.firstWhere((user) => user != _currentUser);
-              return ListTile(
-                title: Text('상대방: $otherUser'),
-                subtitle: Text(chatRoomData['lastMessage']),
-                onTap: () {
-                  _navigateToChatPage(chatRoomData, chatRoomId);
+              final postId = chatRoomData['postId'];
+              final userIds = chatRoomData['users'] as List<dynamic>;
+              final otherUserId = userIds.firstWhere((userId) => userId != _currentUser);
+
+              return FutureBuilder<DocumentSnapshot>(
+                future: FirebaseFirestore.instance
+                    .collection('list')
+                    .doc(postId)
+                    .get(),
+                builder: (BuildContext context,
+                    AsyncSnapshot<DocumentSnapshot> snapshot) {
+                  if (snapshot.hasError || !snapshot.hasData) {
+                    return Container();
+                  }
+
+                  final post = snapshot.data?.data() as Map<String, dynamic>;
+                  final postTitle = post['postTitle'] as String;
+
+                  return ListTile(
+                    title: Text('게시글: $postTitle'),
+                    subtitle: Text('상대방: $otherUserId'),
+                    onTap: () {
+                      _navigateToChatPage(chatRoomData, chatRoomId);
+                    },
+                  );
                 },
               );
             },
@@ -73,8 +92,8 @@ class _ChatRoomListPageState extends State<ChatRoomListPage> {
   }
 
   void _navigateToChatPage(
-      Map<String, dynamic>? chatRoomData, String chatRoomId) async {
-    final currentUser = FirebaseAuth.instance.currentUser;
+      Map<String, dynamic> chatRoomData, String chatRoomId) async {
+    final currentUser = _auth.currentUser;
     if (currentUser == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('로그인이 필요합니다.')),
@@ -86,7 +105,8 @@ class _ChatRoomListPageState extends State<ChatRoomListPage> {
 
     final existingChatRoomQuery = chatRoomsRef
         .where('users', arrayContains: currentUser.uid)
-        .where('users', arrayContains: chatRoomData?['userId']);
+        .where('postId', isEqualTo: chatRoomData['postId'])
+        .where('users', arrayContains: chatRoomData['userId']);
     final existingChatRoomSnapshot = await existingChatRoomQuery.get();
 
     if (existingChatRoomSnapshot.docs.isNotEmpty) {
@@ -102,7 +122,11 @@ class _ChatRoomListPageState extends State<ChatRoomListPage> {
       );
     } else {
       final chatRoom = {
-        'users': [currentUser.uid, chatRoomData?['userId']],
+        'users': [
+          currentUser.uid,
+          chatRoomData['userId'],
+        ],
+        'postId': chatRoomData['postId'],
         'lastMessage': '',
         'lastMessageTime': Timestamp.now(),
       };
@@ -124,16 +148,6 @@ class _ChatRoomListPageState extends State<ChatRoomListPage> {
       });
     }
   }
-}
-
-class ChatPage extends StatefulWidget {
-  final String chatRoomId;
-  final Map<String, dynamic>? chatRoom;
-
-  const ChatPage({required this.chatRoomId, this.chatRoom});
-
-  @override
-  _ChatPageState createState() => _ChatPageState();
 }
 
 class _ChatPageState extends State<ChatPage> {

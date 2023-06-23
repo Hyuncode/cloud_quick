@@ -71,6 +71,11 @@ class _RequestListState extends State<RequestList> {
           }
           return ListView(
             children: snapshot.data!.docs.map((QueryDocumentSnapshot document) {
+              final content = document['content'].toString();
+              final displayContent = content.length > 40
+                  ? content.substring(0, 40) + '...'
+                  : content;
+
               return GestureDetector(
                 onTap: () {
                   Navigator.push(
@@ -82,7 +87,7 @@ class _RequestListState extends State<RequestList> {
                 },
                 child: ListTile(
                   title: Text(document['postTitle']),
-                  subtitle: Text(document['content']),
+                  subtitle: Text(displayContent),
                 ),
               );
             }).toList(),
@@ -141,6 +146,11 @@ class _PerformListState extends State<PerformList> {
           }
           return ListView(
             children: snapshot.data!.docs.map((QueryDocumentSnapshot document) {
+              final content = document['content'].toString();
+              final displayContent = content.length > 40
+                  ? content.substring(0, 40) + '...'
+                  : content;
+
               return GestureDetector(
                 onTap: () {
                   Navigator.push(
@@ -152,7 +162,7 @@ class _PerformListState extends State<PerformList> {
                 },
                 child: ListTile(
                   title: Text(document['postTitle']),
-                  subtitle: Text(document['content']),
+                  subtitle: Text(displayContent),
                 ),
               );
             }).toList(),
@@ -232,6 +242,11 @@ class _MainPostState extends State<MainPost> {
                 return ListView(
                   children: snapshot.data!.docs.map(
                         (QueryDocumentSnapshot document) {
+                      final content = document['content'].toString();
+                      final displayContent = content.length > 40
+                          ? content.substring(0, 40) + '...'
+                          : content;
+
                       return GestureDetector(
                         onTap: () {
                           Navigator.push(
@@ -243,7 +258,7 @@ class _MainPostState extends State<MainPost> {
                         },
                         child: ListTile(
                           title: Text(document['postTitle']),
-                          subtitle: Text(document['content']),
+                          subtitle: Text(displayContent),
                         ),
                       );
                     },
@@ -290,44 +305,55 @@ class _PostPageState extends State<PostPage> {
         title: Text(''), // Empty app bar title
       ),
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '${document['postOption']} | ${document['postTitle']}',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
                 Text(
-                  '제목: ${document['postTitle']}',
+                  'userId: ${document['userId']}',
                   style: TextStyle(fontSize: 16),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '게시자: ${document['userId']}',
+                  'category: ${document['category']}',
                   style: TextStyle(fontSize: 16),
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  '${document['postOption']} 게시글',
-                  style: TextStyle(fontSize: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        SizedBox(width: 4),
+                        Text(
+                          '${document['postStart']}',
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ],
+                    ),
+                    Icon(Icons.arrow_forward),
+                    Text(
+                      '${document['postEnd']}',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '내용: ${document['content']}',
-                  style: TextStyle(fontSize: 16),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '카테고리: ${document['category']}',
-                  style: TextStyle(fontSize: 16),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '출발지: ${document['postStart']}',
-                  style: TextStyle(fontSize: 16),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '도착지: ${document['postEnd']}',
+                  'content: ${document['content']}',
                   style: TextStyle(fontSize: 16),
                 ),
               ],
