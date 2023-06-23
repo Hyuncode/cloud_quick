@@ -86,6 +86,7 @@ class _ChatRoomListPageState extends State<ChatRoomListPage> {
               );
             },
           );
+
         },
       ),
     );

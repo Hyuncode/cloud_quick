@@ -386,6 +386,7 @@ class _PostPageState extends State<PostPage> {
     final existingChatRoomQuery = chatRoomsRef
         .where('postId', isEqualTo: postId)
         .where('users', arrayContains: [currentUserId, userId]);
+    
     final existingChatRoomSnapshot = await existingChatRoomQuery.get();
 
     if (existingChatRoomSnapshot.docs.isNotEmpty) {
@@ -568,3 +569,4 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 }
+
