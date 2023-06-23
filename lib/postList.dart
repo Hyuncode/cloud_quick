@@ -450,6 +450,7 @@ class _PostPageState extends State<PostPage> {
 
     if (existingChatRoomSnapshot.docs.isNotEmpty) {
       final existingChatRoom = existingChatRoomSnapshot.docs.first;
+
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -506,6 +507,37 @@ class _ChatPageState extends State<ChatPage> {
   late Stream<List<QueryDocumentSnapshot>> _messagesStream;
   late TextEditingController _messageController;
 
+  void CreateDelivery() async{
+    CollectionReference database =
+    FirebaseFirestore.instance.collection('delivery');
+    final db = FirebaseFirestore.instance.collection('list');
+    final dbdoc = db.doc(widget.chatRoom["postId"]);
+    final postdata = await dbdoc.get();
+
+    print(widget.chatRoom['postId']);
+    print(postdata['position_lat']);
+    try{
+      await database.add({
+        'deliver_uid' : widget.chatRoom['users'][1],
+        'request_uid' : widget.chatRoom['users'][0],
+        'locationCheck' : false,
+        'postID' : widget.chatRoom['postId'].toString(),
+        'end_lat' : postdata['end_lat'],
+        'end_lon' : postdata['end_lon'],
+        'curr_lat' : postdata['position_lat'],
+        'curr_lon' : postdata['position_lon'],
+        'start_lat' : postdata['position_lat'],
+        'start_lon' : postdata['position_lon'],
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('배송 등록 성공'))
+      );
+    } catch(error){
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('배송 등록 실패')));
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -529,6 +561,14 @@ class _ChatPageState extends State<ChatPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('채팅'),
+        actions: [
+          IconButton(
+            onPressed: (){
+              CreateDelivery();
+            },
+            icon: Icon(Icons.delivery_dining),
+          )
+        ],
       ),
       body: Column(
         children: [

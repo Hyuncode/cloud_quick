@@ -31,6 +31,7 @@ class _addUserState extends State<addUser> {
           SnackBar(content: Text("등록 실패")),
       );
     }
+    _nicknameController.clear();
   }
   
   @override
